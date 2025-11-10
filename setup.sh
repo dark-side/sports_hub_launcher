@@ -145,6 +145,7 @@ log(){  printf "${BLUE}[setup]${RESET} %b\n" "$*"; }
 ok(){   printf "${GREEN}[ ok ]${RESET} %b\n" "$*"; }
 warn(){ printf "${YELLOW}[warn]${RESET} %b\n" "$*"; }
 err(){  printf "${RED}[err ]${RESET} %b\n" "$*"; }
+hint(){ printf "${CYAN}[hint]${RESET} %b\n" "$*"; }
 
 pause(){ echo; read -rp "$(printf "$PROMPT_PRESS_ENTER")" _ || true; }
 
@@ -156,7 +157,107 @@ trap on_error ERR
 have_cmd(){ command -v "$1" >/dev/null 2>&1; }
 platform_os(){ case "$(uname -s)" in Darwin) echo mac;; Linux) echo linux;; MINGW*|MSYS*|CYGWIN*) echo win;; *) echo unknown;; esac; }
 
-run_action() { set +e; "$@"; local rc=$?; set -e; [ $rc -ne 0 ] && warn "$MSG_ACTION_FAILED $rc"; pause; }
+diagnose_podman_issue() {
+  local error_output="$1"
+  echo
+  err "Podman issue detected"
+  echo
+
+  if ! have_cmd podman; then
+    err "Podman is not installed"
+    hint "Run option [2] from the menu for automatic installation"
+    return 1
+  fi
+
+  if echo "$error_output" | grep -qi "VM does not exist"; then
+    err "Podman VM is not initialized"
+    hint "Solution:"
+    hint "  1. Run: ${BOLD}podman machine init${RESET}"
+    hint "  2. Then: ${BOLD}podman machine start${RESET}"
+    hint "  3. Or try option [2] in the menu for automatic setup"
+    return 1
+  fi
+  
+  if echo "$error_output" | grep -qi "cannot connect to podman\|connection.*refused\|no such file or directory.*podman"; then
+    err "Cannot connect to Podman"
+
+    if [ "$(platform_os)" = "mac" ] || [ "$(platform_os)" = "win" ]; then
+      hint "Checking Podman machine status..."
+      
+      if podman machine list >/dev/null 2>&1; then
+        local machine_status
+        machine_status=$(podman machine list 2>&1 || true)
+        echo "$machine_status"
+        
+        if echo "$machine_status" | grep -qi "Currently running"; then
+          warn "Machine is running but connection issues exist"
+          hint "Try restarting Podman machine:"
+          hint "  ${BOLD}podman machine stop && podman machine start${RESET}"
+        else
+          warn "Podman machine is not running"
+          hint "Try starting it:"
+          hint "  ${BOLD}podman machine start${RESET}"
+        fi
+      else
+        err "Podman machine not initialized"
+        hint "Initialize the machine:"
+        hint "  ${BOLD}podman machine init${RESET}"
+        hint "  ${BOLD}podman machine start${RESET}"
+      fi
+    fi
+    
+    hint "If the problem persists:"
+    hint "  1. Completely uninstall Podman:"
+    hint "     ${BOLD}brew uninstall podman-desktop && brew uninstall podman${RESET}"
+    hint "  2. Restart your computer"
+    hint "  3. Run setup.sh again"
+    hint "  More info: https://podman-desktop.io/docs/uninstall"
+    return 1
+  fi
+  
+  if echo "$error_output" | grep -qi "proxy already running\|gvproxy"; then
+    warn "gvproxy issue detected"
+    hint "Attempting automatic fix..."
+    return 2
+  fi
+  
+  if echo "$error_output" | grep -qi "permission denied"; then
+    err "Permission issue detected"
+    hint "May need to add user to group:"
+    hint "  ${BOLD}sudo usermod -aG podman \$(whoami)${RESET}"
+    hint "Then logout and login again"
+    return 1
+  fi
+
+  warn "Unknown Podman error"
+  hint "Try:"
+  hint "  1. Check status: ${BOLD}podman info${RESET}"
+  hint "  2. Restart machine: ${BOLD}podman machine restart${RESET}"
+  hint "  3. View logs: ${BOLD}podman machine inspect${RESET}"
+  return 1
+}
+
+run_action() { 
+  set +e
+  local action_output
+  action_output=$("$@" 2>&1)
+  local rc=$?
+  echo "$action_output"
+  
+  set -e
+  
+  if [ $rc -ne 0 ]; then
+    warn "$MSG_ACTION_FAILED $rc"
+    if echo "$action_output" | grep -qi "podman\|cannot connect\|VM does not exist\|machine"; then
+      echo
+      warn "Looks like a Podman issue"
+      hint "Try option [2] from the menu to check Podman setup"
+      hint "Or see the Troubleshooting section in README"
+    fi
+  fi
+  
+  pause
+}
 
 # ==================== Engine ensure (Podman) ====================
 ensure_container_sane_defaults() {
@@ -185,24 +286,103 @@ ensure_git(){
 }
 
 ensure_podman(){
-  if have_cmd podman; then return 0; fi
+  if have_cmd podman; then 
+    ok "Podman is installed"
+    return 0
+  fi
+  
+  log "Podman not found. Installing..."
+  
   case "$(platform_os)" in
-    mac) if have_cmd brew; then brew install podman; else err "Install Podman: https://podman.io"; return 1; fi ;;
-    linux) sudo apt-get update && sudo apt-get install -y podman || { err "Install Podman: https://podman.io"; return 1; } ;;
-    win) err "On Windows, use Podman Desktop (install manually)"; return 1 ;;
-    *) err "Unsupported OS for auto-install of Podman"; return 1 ;;
+    mac) 
+      if have_cmd brew; then 
+        log "Installing Podman via Homebrew..."
+        if brew install podman; then
+          ok "Podman installed successfully"
+          return 0
+        else
+          err "Failed to install Podman via brew"
+          hint "Try manually:"
+          hint "  ${BOLD}brew install podman${RESET}"
+          hint "Or download Podman Desktop: https://podman-desktop.io"
+          return 1
+        fi
+      else 
+        err "Homebrew not found. Cannot auto-install Podman"
+        hint "Option 1: Install Homebrew first"
+        hint "  Visit: https://brew.sh"
+        hint "  Then: ${BOLD}brew install podman${RESET}"
+        hint "Option 2: Install Podman Desktop"
+        hint "  Visit: https://podman-desktop.io"
+        return 1
+      fi 
+      ;;
+    linux) 
+      log "Installing Podman via apt..."
+      if sudo apt-get update && sudo apt-get install -y podman; then
+        ok "Podman installed successfully"
+        return 0
+      else
+        err "Failed to install Podman"
+        hint "Try manually:"
+        hint "  ${BOLD}sudo apt-get install podman${RESET}"
+        hint "Or visit: https://podman.io/getting-started/installation"
+        return 1
+      fi
+      ;;
+    win) 
+      err "Windows detected. Podman requires manual installation"
+      hint "Download Podman Desktop:"
+      hint "  https://podman-desktop.io/downloads"
+      hint "After installation, restart the script"
+      return 1 
+      ;;
+    *) 
+      err "Unsupported OS for auto-install of Podman"
+      hint "Please install Podman manually: https://podman.io/getting-started/installation"
+      return 1 
+      ;;
   esac
 }
 
 ensure_podman_machine_if_needed(){
   case "$(platform_os)" in
     mac|win)
-      if podman info >/dev/null 2>&1; then return 0; fi
-      if podman machine list >/dev/null 2>&1; then
-        podman machine start || { warn "podman machine start failed"; return 0; }
+      if podman info >/dev/null 2>&1; then 
+        ok "Podman machine is running"
+        return 0
+      fi
+      
+      log "Checking Podman machine status..."
+      local machine_output
+      machine_output=$(podman machine list 2>&1 || true)
+
+      if ! echo "$machine_output" | grep -qi "NAME"; then
+        log "No Podman machine found. Initializing..."
+        if ! podman machine init; then
+          err "Failed to initialize Podman machine"
+          diagnose_podman_issue "$machine_output"
+          return 1
+        fi
+        ok "Podman machine initialized"
+      fi
+
+      log "Starting Podman machine..."
+      local start_output
+      start_output=$(podman machine start 2>&1) || {
+        local rc=$?
+        err "Failed to start Podman machine"
+        diagnose_podman_issue "$start_output"
+        return $rc
+      }
+
+      if podman info >/dev/null 2>&1; then
+        ok "Podman machine started successfully"
+        return 0
       else
-        podman machine init || true
-        podman machine start || true
+        err "Podman machine started but cannot connect"
+        diagnose_podman_issue "$(podman info 2>&1 || true)"
+        return 1
       fi
       ;;
   esac
@@ -230,20 +410,61 @@ restart_podman_machine_if_proxy_stuck(){
 }
 
 ensure_podman_compose(){
-  if have_cmd podman && podman compose version >/dev/null 2>&1; then return 0; fi
-  if have_cmd podman-compose; then return 0; fi
+  if have_cmd podman && podman compose version >/dev/null 2>&1; then 
+    ok "Using built-in 'podman compose'"
+    return 0
+  fi
+  if have_cmd podman-compose; then 
+    ok "Using 'podman-compose'"
+    return 0
+  fi
+  
+  log "Podman Compose not found. Installing..."
+  
   case "$(platform_os)" in
     mac)
-      if have_cmd brew; then brew install podman-compose || true; fi
+      if have_cmd brew; then 
+        log "Installing podman-compose via Homebrew..."
+        brew install podman-compose || {
+          warn "Failed to install podman-compose via brew"
+          hint "Try manually:"
+          hint "  ${BOLD}brew install podman-compose${RESET}"
+        }
+      else
+        err "Homebrew not found. Please install podman-compose manually"
+        hint "Install Homebrew: https://brew.sh"
+        hint "Then: ${BOLD}brew install podman-compose${RESET}"
+        return 1
+      fi
       ;;
     linux)
-      if ! have_cmd pip3; then sudo apt-get update && sudo apt-get install -y python3-pip; fi
-      sudo pip3 install podman-compose || true
+      if ! have_cmd pip3; then 
+        log "Installing pip3..."
+        sudo apt-get update && sudo apt-get install -y python3-pip
+      fi
+      log "Installing podman-compose via pip..."
+      sudo pip3 install podman-compose || {
+        warn "Failed to install podman-compose via pip"
+        hint "Try manually:"
+        hint "  ${BOLD}pip3 install podman-compose${RESET}"
+      }
       ;;
   esac
-  if have_cmd podman && podman compose version >/dev/null 2>&1; then return 0; fi
-  if have_cmd podman-compose; then return 0; fi
-  warn "$WARN_NO_COMPOSE"
+
+  if have_cmd podman && podman compose version >/dev/null 2>&1; then 
+    ok "Successfully installed podman compose"
+    return 0
+  fi
+  if have_cmd podman-compose; then 
+    ok "Successfully installed podman-compose"
+    return 0
+  fi
+  
+  err "$WARN_NO_COMPOSE"
+  hint "Install manually:"
+  hint "  macOS: ${BOLD}brew install podman-compose${RESET}"
+  hint "  Linux: ${BOLD}pip3 install podman-compose${RESET}"
+  return 1
 }
 
 resolve_compose_cmd(){
@@ -282,7 +503,6 @@ patch_compose_frontend_path(){
   [ -z "$f" ] && return 0
   if grep -qE "build:\s*\.\./sports_hub_.*_skeleton" "$f"; then
     log "Patching compose frontend build path -> ../$fe_dir"
-    # macOS BSD sed vs GNU sed: use portable in-place trick
     cp "$f" "$f.bak"
     sed -E "s|(build:\s*)\.\./sports_hub_[^/]*_skeleton|\1../$fe_dir|g" "$f.bak" > "$f"
   fi
@@ -351,35 +571,29 @@ action_clone_update(){
   clone_or_update "$BACKEND_URL" "$BACKEND_DIR"
   clone_or_update "$FRONTEND_URL" "$FRONTEND_DIR"
 
-  # clone any extra repos listed for the current tech (space separated)
   for url in $EXTRA_REPOS_STRING; do
     [ -n "$url" ] || continue
     dir="$(basename "$url" .git)"
     clone_or_update "$url" "$dir"
   done
 
-  # run post-clone hook inside backend dir
   ( cd "$BACKEND_DIR" && "post_clone_${CURRENT_TECH_KEY}" || true )
 
-  # ensure compose references the chosen frontend path
   patch_compose_frontend_path "$BACKEND_DIR" "$FRONTEND_DIR"
 }
 
 action_up(){
-  # Temporarily disable the global error trap for this function,
-  # as we are handling potential errors manually here.
   trap '' ERR
 
   ensure_engine_ready
-  set_target_dir || { trap on_error ERR; return 1; } # Restore trap and exit if dir is missing
+  set_target_dir || { trap on_error ERR; return 1; }
 
   local up_log; up_log="$(mktemp -t setup-up.XXXXXX)"
   local try=1 max_try=2
-  local rc=1 # Default to error status
+  local rc=1
 
   while [ $try -le $max_try ]; do
     log "Starting stack ($try/$max_try): $CMD up -d"
-    # Use 'set +e' to manually capture the return code instead of exiting the script
     set +e
     ( cd "$TARGET_DIR" && $CMD up -d ) 2>&1 | tee "$up_log"
     rc=${PIPESTATUS[0]}
@@ -387,25 +601,49 @@ action_up(){
 
     if [ $rc -eq 0 ]; then
       ok "Stack is up"
-      break # Exit the loop on success
+      rm -f "$up_log"
+      trap on_error ERR
+      return 0
     fi
 
-    # Check for the specific, recoverable "proxy" error
-    if grep -qi "proxy already running" "$up_log"; then
+    local log_content
+    log_content=$(cat "$up_log")
+
+    if echo "$log_content" | grep -qi "proxy already running\|gvproxy"; then
       warn "Compose failed with a known proxy issue (gvproxy stuck). Attempting an automatic fix..."
       restart_podman_machine_if_proxy_stuck
       try=$((try+1))
-      # Loop again for the next try
-    else
-      # If it's a different, unexpected error, show the log and exit the loop
-      err "An unexpected error occurred during 'compose up'. See log below:"
+
+    elif echo "$log_content" | grep -qi "cannot connect to podman\|VM does not exist\|connection.*refused"; then
+      err "An unexpected error occurred during 'compose up'."
+      echo
       cat "$up_log"
-      break # Exit loop on unhandled error
+      echo
+      local diag_rc
+      diagnose_podman_issue "$log_content" || diag_rc=$?
+      
+      if [ "${diag_rc:-0}" -eq 2 ]; then
+        warn "Attempting automatic fix..."
+        restart_podman_machine_if_proxy_stuck
+        try=$((try+1))
+      else
+        break
+      fi
+    else
+      err "An unexpected error occurred during 'compose up'. See log below:"
+      echo
+      cat "$up_log"
+      echo
+      warn "Troubleshooting steps:"
+      hint "  1. Check if Podman is running: ${BOLD}podman info${RESET}"
+      hint "  2. Review compose file: ${BOLD}cat $TARGET_DIR/compose.yml${RESET}"
+      hint "  3. Try running manually: ${BOLD}cd $TARGET_DIR && $CMD up${RESET}"
+      break
     fi
   done
 
   rm -f "$up_log"
-  trap on_error ERR # IMPORTANT: Restore the global error trap before leaving the function
+  trap on_error ERR
   return $rc
 }
 
@@ -486,11 +724,9 @@ action_export_logs_as_json() {
   local outfile="$log_dir/$filename"
 
   log "Exporting logs to ${BOLD}$outfile${RESET}..."
-  # capture logs with timestamps if available; avoid color codes
   (
     echo "["
     cd "$TARGET_DIR"
-    # not all compose flavors support --timestamps; fallback to plain
     if $CMD logs --help 2>&1 | grep -q -- "--timestamps"; then
       $CMD logs --no-color --timestamps
     else
@@ -517,7 +753,6 @@ action_run_docs() {
   ensure_engine_ready || return 1
   local container_name="sportshub-docs-container"
 
-  # if already running, just open
   if podman ps --filter "name=$container_name" --filter "status=running" -q | grep -q .; then
     log "Documentation service is already running."
     open_url "$DOCS_URL"
@@ -594,7 +829,6 @@ print_menu(){
 # ==================== Entry Point ====================
 prompt_for_language
 
-# read previous selection if exists, otherwise force choose
 CURRENT_TECH_KEY="$(cat "$TECH_FILE" 2>/dev/null || true)"
 if [ -z "$CURRENT_TECH_KEY" ]; then
   log "No technology selected yet. Please choose one."
@@ -613,10 +847,8 @@ fi
 CURRENT_FRONTEND_NAME="$(cat "$FRONTEND_FILE" 2>/dev/null || true)"
 apply_tech_selection "$CURRENT_TECH_KEY" "$CURRENT_FRONTEND_NAME"
 
-# Resolve compose once
 CMD=$(resolve_compose_cmd)
 
-# Start logging to file as well
 exec > >(tee -a "$LOG_FILE") 2>&1
 log "$MSG_LOGS_SAVED ${BOLD}$LOG_FILE${RESET}"
 
