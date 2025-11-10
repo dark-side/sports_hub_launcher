@@ -66,10 +66,14 @@ You can clone any of the skeleton projects or simply place the `setup.sh` script
 git clone https://github.com/dark-side/sports_hub_java_skeleton.git
 cd sports_hub_java_skeleton
 chmod +x setup.sh
+./setup.sh
 ```
 
-
-
+### 2. Run the Setup Script
+After making the script executable, run it:
+```bash
+./setup.sh
+```
 
 At startup, you will be prompted to:
 
@@ -91,7 +95,7 @@ Your selections will be stored for future sessions in:
 | **[1] Full Run (install → clone/update → up)** | Performs full environment validation, clones/updates repositories, starts containers, waits for service availability, and opens the app in your browser. |
 | **[2] Check/Install Podman** | Ensures Podman and Compose are installed and configured. Initializes and starts the Podman machine if needed. |
 | **[3] Clone/Update Repositories** | Clones or updates backend, frontend, and optional docs repositories for the selected tech stack. |
-| **[4] Start Stack (up)** | Starts all containers in detached mode (`podman compose up -d`). Includes automatic recovery from “proxy already running” issues. |
+| **[4] Start Stack (up)** | Starts all containers in detached mode (`podman compose up -d`). Includes automatic recovery from "proxy already running" issues. |
 | **[5] Stop Stack (down)** | Stops and removes all running containers for the current backend. |
 | **[6] Rebuild Services (build)** | Rebuilds images for backend and frontend services. |
 | **[7] Pull Images** | Pulls the latest container images defined in your compose file. |
@@ -104,5 +108,44 @@ Your selections will be stored for future sessions in:
 | **[M] Change Language** | Switches interface language between English and Ukrainian. |
 | **[0] Open in Browser** | Opens the running application (default: [http://localhost:3000](http://localhost:3000)). |
 | **[q] Quit** | Exits the CLI. |
+
+---
+
+## Troubleshooting
+
+### Podman Issues
+
+If you experience issues with Podman (e.g., errors about Podman machine, proxy conflicts, or connection problems), follow these steps:
+
+#### Complete Podman Reinstallation
+
+1. **Uninstall Podman completely:**
+   ```bash
+   brew uninstall podman-desktop
+   brew uninstall podman
+   ```
+
+2. **Restart your machine** to ensure all Podman processes are terminated.
+
+3. **Run the setup script** which will install everything from scratch:
+   ```bash
+   ./setup.sh
+   ```
+   The script will automatically detect missing dependencies and install Podman properly.
+
+#### Manual Podman Machine Initialization
+
+If you still experience issues after reinstallation, manually initialize the Podman machine:
+
+```bash
+podman machine init
+podman machine start
+./setup.sh
+```
+
+#### Notes
+- The setup script works best when run from a clean state without manual Podman installations
+- Always ensure both `podman-desktop` and `podman` are uninstalled before reinstalling
+- For more information on uninstalling Podman Desktop, see: [Podman Desktop Uninstallation Guide](https://podman-desktop.io/docs/uninstall)
 
 ---
