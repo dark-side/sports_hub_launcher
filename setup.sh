@@ -123,7 +123,7 @@ ENV_FILE_MAP=(
 post_clone_hook() {
   local tech_key="$1"
   local src_file=""
-  
+
   for entry in "${ENV_FILE_MAP[@]}"; do
     local key="${entry%%:*}"
     local val="${entry#*:}"
@@ -132,7 +132,7 @@ post_clone_hook() {
       break
     fi
   done
-  
+
   if [[ -n "$src_file" && -f "$src_file" ]]; then
     cp -n "$src_file" .env 2>/dev/null || true
     log "Created .env from $src_file"
@@ -937,7 +937,13 @@ print_menu(){
 # ==================== Entry Point ====================
 prompt_for_language
 
-CURRENT_TECH_KEY="$(cat "$TECH_FILE" 2>/dev/null || true)"
+# Use CLI args if provided, otherwise read from config
+if [[ -n "$CLI_TECH" ]]; then
+  CURRENT_TECH_KEY="$CLI_TECH"
+else
+  CURRENT_TECH_KEY="$(cat "$TECH_FILE" 2>/dev/null || true)"
+fi
+
 if [ -z "$CURRENT_TECH_KEY" ]; then
   log "No technology selected yet. Please choose one."
   while [ -z "$CURRENT_TECH_KEY" ]; do
@@ -952,7 +958,12 @@ if [ -z "$CURRENT_TECH_KEY" ]; then
   done
 fi
 
-CURRENT_FRONTEND_NAME="$(cat "$FRONTEND_FILE" 2>/dev/null || true)"
+if [[ -n "$CLI_FRONTEND" ]]; then
+  CURRENT_FRONTEND_NAME="$CLI_FRONTEND"
+else
+  CURRENT_FRONTEND_NAME="$(cat "$FRONTEND_FILE" 2>/dev/null || true)"
+fi
+
 apply_tech_selection "$CURRENT_TECH_KEY" "$CURRENT_FRONTEND_NAME"
 
 CMD=$(resolve_compose_cmd)
