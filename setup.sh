@@ -7,6 +7,7 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
 set -E
 
 # ==================== Defaults / Globals ====================
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_DIR="$HOME/.config/sportshub-setup"
 mkdir -p "$CONFIG_DIR"
 
@@ -752,23 +753,42 @@ action_export_logs_as_json() {
 action_run_docs() {
   ensure_engine_ready || return 1
   local container_name="sportshub-docs-container"
+  local docs_path="$SCRIPT_DIR/$DOCS_DIR_NAME"
 
-  if podman ps --filter "name=$container_name" --filter "status=running" -q | grep -q .; then
+  if podman ps --filter "name=$container_name" --filter "status=running" -q 2>/dev/null | grep -q .; then
     log "Documentation service is already running."
     open_url "$DOCS_URL"
     return 0
   fi
 
+  if podman ps -a --filter "name=$container_name" -q 2>/dev/null | grep -q .; then
+    log "Removing stopped docs container..."
+    podman rm -f "$container_name" >/dev/null 2>&1 || true
+  fi
+
   log "$MSG_STARTING_DOCS"
-  clone_or_update "$DOCS_REPO_URL" "$DOCS_DIR_NAME"
+  
+  clone_or_update "$DOCS_REPO_URL" "$docs_path"
+
+  if [ ! -d "$docs_path" ]; then
+    err "Failed to clone docs repository to $docs_path"
+    return 1
+  fi
 
   local image_name="sportshub/api-docs-playground"
 
   log "Building docs image: $image_name..."
-  ( cd "$DOCS_DIR_NAME" && podman build -t "$image_name" . )
+  if ! ( cd "$docs_path" && podman build -t "$image_name" . ); then
+    err "Failed to build docs image"
+    return 1
+  fi
 
   log "Running new docs container..."
-  podman run -d --rm --name "$container_name" -p 5173:5173 "$image_name"
+  if ! podman run -d --rm --name "$container_name" -p 5173:5173 "$image_name"; then
+    err "Failed to start docs container"
+    hint "Check if port 5173 is already in use: ${BOLD}lsof -i :5173${RESET}"
+    return 1
+  fi
 
   wait_for_url "$DOCS_URL" || warn "Docs service may not be ready yet."
   open_url "$DOCS_URL"
