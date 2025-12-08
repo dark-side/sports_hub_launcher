@@ -6,6 +6,53 @@ set -euo pipefail
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
 set -E
 
+show_help() {
+  cat <<EOF
+Usage: $(basename "$0") [OPTIONS]
+
+Sports Hub Setup — Universal interactive menu for multi-stack app (backend + frontend)
+Engine: Podman (no Docker). macOS / Linux / Windows(Git Bash) supported.
+
+Options:
+  -h, --help          Show this help message and exit
+  -v, --version       Show version information
+  --no-tee            Disable tee logging (fixes some terminal issues)
+  --tech=<KEY>        Pre-select backend technology (java|python|ruby|go|cpp|php|node|net|rust)
+  --frontend=<NAME>   Pre-select frontend (React|Angular)
+
+Environment Variables:
+  ENABLE_TEE_LOG=0    Disable tee logging
+  OPEN_BROWSER=0      Disable auto-opening browser
+  WAIT_TIMEOUT=N      Timeout in seconds for waiting on services (default: 180)
+
+Examples:
+  $(basename "$0")                    # Interactive mode
+  $(basename "$0") --tech=python      # Pre-select Python backend
+  $(basename "$0") --no-tee           # Disable tee logging
+
+For more information, see: https://github.com/dark-side/sports_hub_launcher
+EOF
+  exit 0
+}
+
+show_version() {
+  echo "Sports Hub Setup v1.0.0"
+  exit 0
+}
+
+CLI_TECH=""
+CLI_FRONTEND=""
+for arg in "$@"; do
+  case "$arg" in
+    -h|--help) show_help ;;
+    -v|--version) show_version ;;
+    --no-tee) ENABLE_TEE_LOG=0 ;;
+    --tech=*) CLI_TECH="${arg#*=}" ;;
+    --frontend=*) CLI_FRONTEND="${arg#*=}" ;;
+    *) echo "Unknown option: $arg"; echo "Use --help for usage information."; exit 1 ;;
+  esac
+done
+
 # ==================== Defaults / Globals ====================
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_DIR="$HOME/.config/sportshub-setup"
@@ -17,6 +64,7 @@ OPEN_BROWSER=${OPEN_BROWSER:-1}
 WAIT_URL="${WAIT_URL:-http://localhost:3000/}"
 WAIT_TIMEOUT="${WAIT_TIMEOUT:-180}"
 LOG_FILE="$CONFIG_DIR/setup.log"
+ENABLE_TEE_LOG=${ENABLE_TEE_LOG:-1}
 TECH_FILE="$CONFIG_DIR/tech"
 FRONTEND_FILE="$CONFIG_DIR/frontend"
 
@@ -36,7 +84,6 @@ BACKEND_URLS=(
   "https://github.com/dark-side/sports_hub_rust_skeleton.git"     # rust
 )
 
-# default frontend per backend
 DEFAULT_FES=("React" "React" "React" "Angular" "React" "React" "Angular" "Angular" "React")
 
 FRONTEND_NAMES=("React" "Angular")
@@ -45,7 +92,6 @@ FRONTEND_URLS=(
   "https://github.com/dark-side/sports_hub_angular_skeleton.git"
 )
 
-# optional extra repos per backend (space-separated per item; empty if none)
 EXTRA_REPOS=(
   ""                                                    # java
   "https://github.com/dark-side/api_docs_genai_playground.git"  # python
@@ -62,16 +108,36 @@ DOCS_REPO_URL="https://github.com/dark-side/api_docs_genai_playground.git"
 DOCS_DIR_NAME="api_docs_genai_playground"
 DOCS_URL="http://localhost:5173"
 
-# post-clone hooks (per-backend)
-post_clone_java()  { :; }
-post_clone_python(){ [ -f ".env.example" ] && cp -n .env.example .env || true; }
-post_clone_ruby()  { :; }
-post_clone_go()    { [ -f ".example.env" ] && cp -n .example.env .env || true; }
-post_clone_cpp()   { [ -f ".env.example" ] && cp -n .env.example .env || true; }
-post_clone_php()   { :; }
-post_clone_node()  { :; }
-post_clone_net()   { :; }
-post_clone_rust()  { [ -f ".env.example" ] && cp -n .env.example .env || true; }
+ENV_FILE_MAP=(
+  "java:"
+  "python:.env.example"
+  "ruby:"
+  "go:.example.env"
+  "cpp:.env.example"
+  "php:"
+  "node:"
+  "net:"
+  "rust:.env.example"
+)
+
+post_clone_hook() {
+  local tech_key="$1"
+  local src_file=""
+  
+  for entry in "${ENV_FILE_MAP[@]}"; do
+    local key="${entry%%:*}"
+    local val="${entry#*:}"
+    if [[ "$key" == "$tech_key" ]]; then
+      src_file="$val"
+      break
+    fi
+  done
+  
+  if [[ -n "$src_file" && -f "$src_file" ]]; then
+    cp -n "$src_file" .env 2>/dev/null || true
+    log "Created .env from $src_file"
+  fi
+}
 
 # ==================== i18n ====================
 set_lang_uk(){
@@ -578,7 +644,7 @@ action_clone_update(){
     clone_or_update "$url" "$dir"
   done
 
-  ( cd "$BACKEND_DIR" && "post_clone_${CURRENT_TECH_KEY}" || true )
+  ( cd "$BACKEND_DIR" && post_clone_hook "$CURRENT_TECH_KEY" )
 
   patch_compose_frontend_path "$BACKEND_DIR" "$FRONTEND_DIR"
 }
@@ -701,7 +767,6 @@ open_url(){
   esac
 }
 
-# ----- Logs menu & export -----
 action_logs() {
   ensure_engine_ready || return 1
   set_target_dir || return 1
@@ -723,33 +788,56 @@ action_export_logs_as_json() {
   local log_dir="app_logs"; mkdir -p "$log_dir"
   local filename="log-$(date +%Y%m%d-%H%M%S).json"
   local outfile="$log_dir/$filename"
+  local raw_log; raw_log="$(mktemp)"
 
   log "Exporting logs to ${BOLD}$outfile${RESET}..."
+
   (
-    echo "["
     cd "$TARGET_DIR"
     if $CMD logs --help 2>&1 | grep -q -- "--timestamps"; then
-      $CMD logs --no-color --timestamps
+      $CMD logs --no-color --timestamps 2>/dev/null
     else
-      $CMD logs --no-color
-    fi | awk '
-      BEGIN { first=1 }
-      {
-        gsub("\\\\","\\\\\\\\" );
-        gsub("\"","\\\"" );
-        line=$0;
-        if (first==0) { printf(",\n") } else { first=0 }
-        printf("{\"line\":\"%s\"}", line)
-      }
-      END { printf("\n") }
-    '
-    echo "]"
-  ) > "$outfile"
+      $CMD logs --no-color 2>/dev/null
+    fi
+  ) > "$raw_log"
 
+  if have_cmd jq; then
+    jq -R -s 'split("\n") | map(select(length > 0)) | map({line: .})' < "$raw_log" > "$outfile"
+  elif have_cmd python3; then
+    python3 -c "
+import json, sys
+lines = [{'line': l} for l in sys.stdin.read().splitlines() if l]
+print(json.dumps(lines, ensure_ascii=False, indent=2))
+" < "$raw_log" > "$outfile"
+  elif have_cmd python; then
+    python -c "
+import json, sys
+lines = [{'line': l} for l in sys.stdin.read().splitlines() if l]
+print(json.dumps(lines, ensure_ascii=False, indent=2))
+" < "$raw_log" > "$outfile"
+  else
+    (
+      echo "["
+      awk '
+        BEGIN { first=1 }
+        {
+          gsub(/\\/, "\\\\");
+          gsub(/"/, "\\\"");
+          gsub(/\t/, "\\t");
+          gsub(/\r/, "");
+          if (first==0) { printf(",\n") } else { first=0 }
+          printf("{\"line\":\"%s\"}", $0)
+        }
+        END { if (first==0) printf("\n") }
+      ' < "$raw_log"
+      echo "]"
+    ) > "$outfile"
+  fi
+
+  rm -f "$raw_log"
   ok "$LOG_SAVED_TO ${BOLD}$outfile${RESET}"
 }
 
-# ----- Docs runner -----
 action_run_docs() {
   ensure_engine_ready || return 1
   local container_name="sportshub-docs-container"
@@ -767,7 +855,7 @@ action_run_docs() {
   fi
 
   log "$MSG_STARTING_DOCS"
-  
+
   clone_or_update "$DOCS_REPO_URL" "$docs_path"
 
   if [ ! -d "$docs_path" ]; then
@@ -869,8 +957,10 @@ apply_tech_selection "$CURRENT_TECH_KEY" "$CURRENT_FRONTEND_NAME"
 
 CMD=$(resolve_compose_cmd)
 
-exec > >(tee -a "$LOG_FILE") 2>&1
-log "$MSG_LOGS_SAVED ${BOLD}$LOG_FILE${RESET}"
+if [[ "${ENABLE_TEE_LOG:-1}" == "1" ]]; then
+  exec > >(tee -a "$LOG_FILE") 2>&1
+  log "$MSG_LOGS_SAVED ${BOLD}$LOG_FILE${RESET}"
+fi
 
 clear; print_banner
 
