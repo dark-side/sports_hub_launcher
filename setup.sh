@@ -142,39 +142,59 @@ post_clone_hook() {
 # ==================== i18n ====================
 set_lang_uk(){
   MSG_LOGS_SAVED="Логи збережено в:"; PROMPT_PRESS_ENTER="Натисніть Enter..."; PROMPT_CHOICE="> Ваш вибір:"; WARN_UNKNOWN_CHOICE="Невідомий вибір";
-  MENU_TITLE="Оберіть дію:"; MENU_1_FULL_START="Повний запуск (інсталяція → клон/оновлення → запуск)";
-  MENU_2_ENSURE_ENGINE="Перевірка/інсталяція Podman"; MENU_3_CLONE_UPDATE="Клонувати/оновити репозиторії";
-  MENU_4_UP="Запустити stack"; MENU_5_DOWN="Зупинити stack"; MENU_6_BUILD="Перезібрати сервіси"; MENU_7_PULL="Pull образів";
-  MENU_8_LOGS="Меню логів"; MENU_L_LOGS_SNAPSHOT="Логи (останні 200)"; MENU_9_STATUS="Статус (ps)";
-  MENU_T_CHOOSE_TECH="Змінити технологію"; MENU_F_CHOOSE_FRONTEND="Змінити фронтенд"; MENU_M_CHOOSE_LANG="Змінити мову";
-  MENU_D_VIEW_DOCS="Відкрити документацію"; MENU_0_OPEN="Відкрити у браузері"; MENU_Q_QUIT="Вихід";
-  MENU_C_CLEANUP="Очистити Podman (повний reset)";
-  FRONTEND_BANNER_TITLE="Фронтенд"; FRONTEND_CURRENT="поточний:"; FRONTEND_PROMPT="Оберіть фронтенд:";
-  TECH_BANNER_TITLE="Технологія"; TECH_CURRENT="поточна:"; TECH_PROMPT="Оберіть технологію (бекенд):";
-  MSG_FRONTEND_SET="Фронтенд встановлено:"; MSG_TECH_SET="Технологію встановлено:"; MSG_ACTION_FAILED="Дія завершилась з кодом";
-  WARN_NO_COMPOSE="Не знайдено 'podman compose' або 'podman-compose'.";
-  LOG_MENU_PROMPT="Що зробити з логами?"; LOG_MENU_VIEW="Переглянути логи в терміналі"; LOG_MENU_SAVE="Зберегти логи у JSON файл"; LOG_MENU_BACK="Назад";
-  LOG_SAVED_TO="Логи збережено у файл:"; MSG_STARTING_DOCS="Запускаю сервіс документації...";
-  MSG_CLEANUP_WARN="УВАГА: Це видалить ВСІ контейнери, образи та Podman machine!";
-  MSG_CLEANUP_CONFIRM="Продовжити? (y/N):"; MSG_CLEANUP_DONE="Podman повністю очищено.";
+  # Main menu
+  MENU_TITLE="Оберіть дію:"; MENU_1_FULL_START="Повний запуск";
+  MENU_S_STACK="Управління Stack"; MENU_T_TOOLS="Інструменти";
+  MENU_A_API="API Info"; MENU_D_VIEW_DOCS="Документація";
+  MENU_0_OPEN="Відкрити у браузері"; MENU_Q_QUIT="Вихід";
+  # Stack submenu
+  MENU_STACK_TITLE="Управління Stack"; MENU_UP="Запустити"; MENU_DOWN="Зупинити";
+  MENU_BUILD="Перезібрати"; MENU_PULL="Pull образів"; MENU_STATUS="Статус";
+  MENU_CLONE="Клонувати/оновити репо"; MENU_BACK="Назад";
+  # Tools submenu
+  MENU_TOOLS_TITLE="Інструменти"; MENU_LOGS="Переглянути логи"; MENU_LOGS_SAVE="Зберегти логи";
+  MENU_ENSURE="Перевірити Podman"; MENU_CLEANUP="Очистити Podman";
+  MENU_TECH="Змінити технологію"; MENU_FRONTEND="Змінити фронтенд"; MENU_LANG="Змінити мову";
+  # Other
+  FRONTEND_BANNER_TITLE="Фронтенд"; TECH_BANNER_TITLE="Технологія";
+  FRONTEND_PROMPT="Оберіть фронтенд"; TECH_PROMPT="Оберіть технологію бекенду";
+  MSG_FRONTEND_SET="Фронтенд встановлено:"; MSG_TECH_SET="Технологію встановлено:";
+  MSG_ACTION_FAILED="Дія завершилась з кодом"; WARN_NO_COMPOSE="Не знайдено 'podman compose'.";
+  LOG_MENU_PROMPT="Що зробити з логами?"; LOG_MENU_VIEW="Переглянути"; LOG_MENU_SAVE="Зберегти (JSON)"; LOG_MENU_BACK="Назад";
+  LOG_SAVED_TO="Логи збережено:"; MSG_STARTING_DOCS="Запускаю документацію...";
+  MSG_CLEANUP_WARN="УВАГА: Видалить ВСІ контейнери, образи та Podman!";
+  MSG_CLEANUP_CONFIRM="Продовжити? (y/N):"; MSG_CLEANUP_DONE="Podman очищено.";
+  # Section headers
+  SECTION_MAIN="ОСНОВНЕ"; SECTION_RESOURCES="РЕСУРСИ"; SECTION_SETTINGS="НАЛАШТУВАННЯ";
+  SECTION_STACK_OPS="ОПЕРАЦІЇ"; SECTION_LOGS="ЛОГИ"; SECTION_PODMAN="PODMAN";
 }
 set_lang_en(){
   MSG_LOGS_SAVED="Logs saved to:"; PROMPT_PRESS_ENTER="Press Enter..."; PROMPT_CHOICE="> Your choice:"; WARN_UNKNOWN_CHOICE="Unknown choice";
-  MENU_TITLE="Select an action:"; MENU_1_FULL_START="Full run (install → clone/update → up)";
-  MENU_2_ENSURE_ENGINE="Check/Install Podman"; MENU_3_CLONE_UPDATE="Clone/update repositories";
-  MENU_4_UP="Start stack"; MENU_5_DOWN="Stop stack"; MENU_6_BUILD="Rebuild services"; MENU_7_PULL="Pull images";
-  MENU_8_LOGS="Logs Menu"; MENU_L_LOGS_SNAPSHOT="Logs (last 200)"; MENU_9_STATUS="Status (ps)";
-  MENU_T_CHOOSE_TECH="Change technology"; MENU_F_CHOOSE_FRONTEND="Change frontend"; MENU_M_CHOOSE_LANG="Change language";
-  MENU_D_VIEW_DOCS="Open Documentation"; MENU_0_OPEN="Open in browser"; MENU_Q_QUIT="Quit";
-  MENU_C_CLEANUP="Cleanup Podman (full reset)";
-  FRONTEND_BANNER_TITLE="Frontend"; FRONTEND_CURRENT="current:"; FRONTEND_PROMPT="Choose a frontend:";
-  TECH_BANNER_TITLE="Technology"; TECH_CURRENT="current:"; TECH_PROMPT="Choose a backend technology:";
-  MSG_FRONTEND_SET="Frontend set to:"; MSG_TECH_SET="Technology set to:"; MSG_ACTION_FAILED="Action finished with code";
-  WARN_NO_COMPOSE="Could not find 'podman compose' or 'podman-compose'.";
-  LOG_MENU_PROMPT="What to do with logs?"; LOG_MENU_VIEW="View logs in terminal"; LOG_MENU_SAVE="Save logs to JSON file"; LOG_MENU_BACK="Back";
-  LOG_SAVED_TO="Logs saved to file:"; MSG_STARTING_DOCS="Starting documentation service...";
-  MSG_CLEANUP_WARN="WARNING: This will remove ALL containers, images and Podman machine!";
-  MSG_CLEANUP_CONFIRM="Continue? (y/N):"; MSG_CLEANUP_DONE="Podman fully cleaned up.";
+  # Main menu
+  MENU_TITLE="Select action:"; MENU_1_FULL_START="Full Start";
+  MENU_S_STACK="Manage Stack"; MENU_T_TOOLS="Tools";
+  MENU_A_API="API Info"; MENU_D_VIEW_DOCS="Documentation";
+  MENU_0_OPEN="Open in browser"; MENU_Q_QUIT="Quit";
+  # Stack submenu
+  MENU_STACK_TITLE="Stack Management"; MENU_UP="Start"; MENU_DOWN="Stop";
+  MENU_BUILD="Rebuild"; MENU_PULL="Pull images"; MENU_STATUS="Status";
+  MENU_CLONE="Clone/update repos"; MENU_BACK="Back";
+  # Tools submenu
+  MENU_TOOLS_TITLE="Tools"; MENU_LOGS="View logs"; MENU_LOGS_SAVE="Save logs";
+  MENU_ENSURE="Check Podman"; MENU_CLEANUP="Cleanup Podman";
+  MENU_TECH="Change technology"; MENU_FRONTEND="Change frontend"; MENU_LANG="Change language";
+  # Other
+  FRONTEND_BANNER_TITLE="Frontend"; TECH_BANNER_TITLE="Technology";
+  FRONTEND_PROMPT="Choose frontend"; TECH_PROMPT="Choose backend technology";
+  MSG_FRONTEND_SET="Frontend set to:"; MSG_TECH_SET="Technology set to:";
+  MSG_ACTION_FAILED="Action failed with code"; WARN_NO_COMPOSE="Could not find 'podman compose'.";
+  LOG_MENU_PROMPT="Logs:"; LOG_MENU_VIEW="View"; LOG_MENU_SAVE="Save (JSON)"; LOG_MENU_BACK="Back";
+  LOG_SAVED_TO="Logs saved:"; MSG_STARTING_DOCS="Starting docs...";
+  MSG_CLEANUP_WARN="WARNING: Will remove ALL containers, images and Podman!";
+  MSG_CLEANUP_CONFIRM="Continue? (y/N):"; MSG_CLEANUP_DONE="Podman cleaned up.";
+  # Section headers
+  SECTION_MAIN="MAIN"; SECTION_RESOURCES="RESOURCES"; SECTION_SETTINGS="SETTINGS";
+  SECTION_STACK_OPS="OPERATIONS"; SECTION_LOGS="LOGS"; SECTION_PODMAN="PODMAN";
 }
 
 # ==================== UI / helpers ====================
@@ -203,13 +223,20 @@ ASCII
 prompt_for_language() {
   clear; print_banner
   while true; do
-    printf "${BOLD}Please choose a language / Будь ласка, оберіть мову:${RESET}\n"
-    printf "  ${CYAN}[1]${RESET} English\n  ${CYAN}[2]${RESET} Українська\n\n"
+    echo
+    printf "${BOLD}Please choose a language / Будь ласка, оберіть мову${RESET}\n"
+    printf "${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+    echo
+    printf "  ${CYAN}[1]${RESET}  English\n"
+    printf "  ${CYAN}[2]${RESET}  Українська\n"
+    echo
+    printf "${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+    echo
     read -rp "$(printf "${BOLD}> Your choice / Ваш вибір:${RESET} ")" c
     case "$c" in
       1) set_lang_en; break ;;
       2) set_lang_uk; break ;;
-      *) clear; print_banner; printf "${RED}Invalid selection\n\n${RESET}" ;;
+      *) clear; print_banner; printf "${RED}Invalid selection / Невірний вибір${RESET}\n\n"; sleep 1 ;;
     esac
   done
 }
@@ -853,6 +880,7 @@ action_run_docs() {
     log "Documentation service is already running."
     open_url "$DOCS_URL"
     return 0
+
   fi
 
   if podman ps -a --filter "name=$container_name" -q 2>/dev/null | grep -q .; then
@@ -888,16 +916,54 @@ action_run_docs() {
   open_url "$DOCS_URL"
 }
 
+# ==================== API Info ====================
+action_api_info() {
+  local api_port="3002"
+  local frontend_port="3000"
+  
+  clear; print_banner
+  echo
+  printf "  ${BOLD}API Information${RESET}\n"
+  printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  echo
+  printf "  ${BOLD}Backend API${RESET}\n"
+  printf "    URL:  ${GREEN}http://localhost:${api_port}${RESET}\n"
+  echo
+  printf "  ${BOLD}Endpoints${RESET}\n"
+  printf "    ${CYAN}GET ${RESET} /api/articles          - List all articles\n"
+  printf "    ${CYAN}GET ${RESET} /api/articles/:id      - Get article by ID\n"
+  printf "    ${CYAN}POST${RESET} /api/articles          - Create article\n"
+  printf "    ${CYAN}GET ${RESET} /api/users             - List users\n"
+  printf "    ${CYAN}POST${RESET} /users/registrations   - Register user\n"
+  printf "    ${CYAN}POST${RESET} /api/auth/sign_in      - Sign in\n"
+  echo
+  printf "  ${BOLD}Example curl${RESET}\n"
+  printf "    ${YELLOW}curl http://localhost:${api_port}/api/articles${RESET}\n"
+  printf "    ${YELLOW}curl http://localhost:${api_port}/api/articles/1${RESET}\n"
+  echo
+  printf "  ${BOLD}Frontend${RESET}\n"
+  printf "    URL:  ${GREEN}http://localhost:${frontend_port}${RESET}\n"
+  echo
+  printf "  ${BOLD}Documentation${RESET}\n"
+  printf "    URL:  ${GREEN}http://localhost:5173${RESET} (run [D] to start)\n"
+  echo
+}
+
 # ==================== Podman Cleanup ====================
 action_cleanup_podman() {
   echo
   warn "$MSG_CLEANUP_WARN"
   echo
-  printf "  ${YELLOW}podman stop -a${RESET}           - Stop all containers\n"
-  printf "  ${YELLOW}podman rm -a${RESET}             - Remove all containers\n"
-  printf "  ${YELLOW}podman rmi -a -f${RESET}         - Remove all images\n"
-  printf "  ${YELLOW}podman system prune -a -f${RESET} - Prune system\n"
-  printf "  ${YELLOW}podman machine rm -f${RESET}     - Remove Podman VM\n"
+  printf "  ${YELLOW}podman stop -a${RESET}             - Stop all containers\n"
+  printf "  ${YELLOW}podman rm -a${RESET}               - Remove all containers\n"
+  printf "  ${YELLOW}podman rmi -a -f${RESET}           - Remove all images\n"
+  printf "  ${YELLOW}podman system prune -a -f${RESET}  - Prune system\n"
+  printf "  ${YELLOW}podman machine rm -f${RESET}       - Remove Podman VM\n"
+  if [[ "$(platform_os)" == "mac" ]]; then
+    printf "  ${YELLOW}brew uninstall podman-common${RESET}\n"
+    printf "  ${YELLOW}brew uninstall podman${RESET}\n"
+  fi
+  printf "  ${YELLOW}rm -rf ~/.config/containers ...${RESET}\n"
   echo
 
   read -rp "$(printf "${BOLD}$MSG_CLEANUP_CONFIRM${RESET} ")" confirm
@@ -924,13 +990,17 @@ action_cleanup_podman() {
     podman machine rm -f 2>/dev/null || true
   fi
 
-  read -rp "$(printf "${BOLD}Remove Podman config files too? (~/.config/containers, etc.) (y/N):${RESET} ")" rm_config
-  if [[ "$rm_config" =~ ^[Yy]$ ]]; then
-    log "Removing Podman config directories..."
-    rm -rf ~/.config/containers ~/.local/share/containers ~/.cache/podman 2>/dev/null || true
-    
-    if [[ "$(platform_os)" == "mac" ]]; then
-      hint "To fully uninstall Podman: ${BOLD}brew uninstall podman qemu lima${RESET}"
+  log "Removing Podman config directories..."
+  rm -rf ~/.config/containers ~/.local/share/containers ~/.cache/podman 2>/dev/null || true
+
+  if [[ "$(platform_os)" == "mac" ]]; then
+    echo
+    read -rp "$(printf "${BOLD}Uninstall Podman via brew too? (y/N):${RESET} ")" uninstall_brew
+    if [[ "$uninstall_brew" =~ ^[Yy]$ ]]; then
+      log "Uninstalling Podman via Homebrew..."
+      brew uninstall podman-common 2>/dev/null || true
+      brew uninstall podman 2>/dev/null || true
+      ok "Podman uninstalled via brew"
     fi
   fi
 
@@ -940,25 +1010,39 @@ action_cleanup_podman() {
 
 # ==================== Menus ====================
 choose_technology(){
-  clear; print_banner; printf "${CYAN}${BOLD}${TECH_BANNER_TITLE}${RESET}\n";
-  for i in "${!TECHS[@]}"; do printf "  [%d] %s\n" "$((i+1))" "${TECHS[$i]}"; done
-  printf "\n  [q] %s\n" "$MENU_Q_QUIT"
+  clear; print_banner
+  echo
+  printf "  ${BOLD}${TECH_PROMPT}${RESET}\n"
+  printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  echo
+  for i in "${!TECHS[@]}"; do 
+    printf "    ${CYAN}[%d]${RESET}  %s\n" "$((i+1))" "${TECHS[$i]}"
+  done
+  echo
+  printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  printf "    ${CYAN}[0]${RESET}  %s\n" "$MENU_BACK"
+  echo
   read -rp "$(printf "${BOLD}$PROMPT_CHOICE${RESET} ")" c
   if [[ "$c" =~ ^[0-9]+$ ]] && [ "$c" -ge 1 ] && [ "$c" -le "${#TECHS[@]}" ]; then
     local tech_key="${TECH_KEYS[$((c-1))]}"
     apply_tech_selection "$tech_key"
     log "$MSG_TECH_SET ${BOLD}$CURRENT_TECH${RESET}"
-  elif [[ "$c" == "q" ]]; then
-    :
-  else
-    warn "$WARN_UNKNOWN_CHOICE"
   fi
 }
 
 choose_frontend(){
-  clear; print_banner; printf "${BOLD}$FRONTEND_PROMPT${RESET}\n"
-  for i in "${!FRONTEND_NAMES[@]}"; do printf "  [%d] %s\n" "$((i+1))" "${FRONTEND_NAMES[$i]}"; done
-  printf "\n  [q] %s\n" "$MENU_Q_QUIT"
+  clear; print_banner
+  echo
+  printf "  ${BOLD}${FRONTEND_PROMPT}${RESET}\n"
+  printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  echo
+  for i in "${!FRONTEND_NAMES[@]}"; do 
+    printf "    ${CYAN}[%d]${RESET}  %s\n" "$((i+1))" "${FRONTEND_NAMES[$i]}"
+  done
+  echo
+  printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  printf "    ${CYAN}[0]${RESET}  %s\n" "$MENU_BACK"
+  echo
   read -rp "$(printf "${BOLD}$PROMPT_CHOICE${RESET} ")" c
   if [[ "$c" =~ ^[0-9]+$ ]] && [ "$c" -ge 1 ] && [ "$c" -le "${#FRONTEND_NAMES[@]}" ]; then
     local fe_name="${FRONTEND_NAMES[$((c-1))]}"
@@ -967,28 +1051,95 @@ choose_frontend(){
   fi
 }
 
+# Main menu
 print_menu(){
   echo
-  printf "${CYAN}${TECH_BANNER_TITLE}: ${BOLD}%s${RESET} | ${CYAN}${FRONTEND_BANNER_TITLE}: ${BOLD}%s${RESET}\n" "$CURRENT_TECH" "$CURRENT_FRONTEND_NAME"
-  printf "${BOLD}$MENU_TITLE${RESET}\n"
-  printf "  ${CYAN}[1]${RESET} %s\n" "$MENU_1_FULL_START"
-  printf "  ${CYAN}[2]${RESET} %s\n" "$MENU_2_ENSURE_ENGINE"
-  printf "  ${CYAN}[3]${RESET} %s\n" "$MENU_3_CLONE_UPDATE"
-  printf "  ${CYAN}[4]${RESET} %s\n" "$MENU_4_UP"
-  printf "  ${CYAN}[5]${RESET} %s\n" "$MENU_5_DOWN"
-  printf "  ${CYAN}[6]${RESET} %s\n" "$MENU_6_BUILD"
-  printf "  ${CYAN}[7]${RESET} %s\n" "$MENU_7_PULL"
-  printf "  ${CYAN}[8]${RESET} %s\n" "$MENU_8_LOGS"
-  printf "  ${CYAN}[L]${RESET} %s\n" "$MENU_L_LOGS_SNAPSHOT"
-  printf "  ${CYAN}[9]${RESET} %s\n" "$MENU_9_STATUS"
-  printf "  ${CYAN}[T]${RESET} %s\n" "$MENU_T_CHOOSE_TECH"
-  printf "  ${CYAN}[F]${RESET} %s\n" "$MENU_F_CHOOSE_FRONTEND"
-  printf "  ${CYAN}[D]${RESET} %s\n" "$MENU_D_VIEW_DOCS"
-  printf "  ${CYAN}[M]${RESET} %s\n" "$MENU_M_CHOOSE_LANG"
-  printf "  ${CYAN}[0]${RESET} %s\n" "$MENU_0_OPEN"
-  printf "  ${CYAN}[C]${RESET} %s\n" "$MENU_C_CLEANUP"
-  printf "  ${CYAN}[q]${RESET} %s\n" "$MENU_Q_QUIT"
+  printf "  ${BOLD}${TECH_BANNER_TITLE}:${RESET} ${GREEN}%s${RESET}    ${BOLD}${FRONTEND_BANNER_TITLE}:${RESET} ${GREEN}%s${RESET}\n" "$CURRENT_TECH" "$CURRENT_FRONTEND_NAME"
+  printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
   echo
+  printf "  ${BOLD}${SECTION_MAIN}${RESET}\n"
+  printf "    ${GREEN}[1]${RESET}  %s\n" "$MENU_1_FULL_START"
+  printf "    ${CYAN}[S]${RESET}  %s\n" "$MENU_S_STACK"
+  printf "    ${CYAN}[X]${RESET}  %s\n" "$MENU_T_TOOLS"
+  echo
+  printf "  ${BOLD}${SECTION_RESOURCES}${RESET}\n"
+  printf "    ${CYAN}[A]${RESET}  %s\n" "$MENU_A_API"
+  printf "    ${CYAN}[D]${RESET}  %s\n" "$MENU_D_VIEW_DOCS"
+  printf "    ${CYAN}[0]${RESET}  %s\n" "$MENU_0_OPEN"
+  echo
+  printf "  ${BOLD}${SECTION_SETTINGS}${RESET}\n"
+  printf "    ${YELLOW}[T]${RESET}  %s\n" "$MENU_TECH"
+  printf "    ${YELLOW}[F]${RESET}  %s\n" "$MENU_FRONTEND"
+  printf "    ${YELLOW}[M]${RESET}  %s\n" "$MENU_LANG"
+  echo
+  printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  printf "    ${RED}[Q]${RESET}  %s\n" "$MENU_Q_QUIT"
+  echo
+}
+
+# Stack submenu
+menu_stack(){
+  while true; do
+    clear; print_banner
+    echo
+    printf "  ${BOLD}$MENU_STACK_TITLE${RESET}\n"
+    printf "  ${BOLD}${TECH_BANNER_TITLE}:${RESET} ${GREEN}%s${RESET}\n" "$CURRENT_TECH"
+    printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+    echo
+    printf "  ${BOLD}${SECTION_STACK_OPS}${RESET}\n"
+    printf "    ${GREEN}[1]${RESET}  %s\n" "$MENU_UP"
+    printf "    ${YELLOW}[2]${RESET}  %s\n" "$MENU_DOWN"
+    printf "    ${CYAN}[3]${RESET}  %s\n" "$MENU_BUILD"
+    printf "    ${CYAN}[4]${RESET}  %s\n" "$MENU_PULL"
+    printf "    ${CYAN}[5]${RESET}  %s\n" "$MENU_STATUS"
+    printf "    ${CYAN}[6]${RESET}  %s\n" "$MENU_CLONE"
+    echo
+    printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+    printf "    ${CYAN}[0]${RESET}  %s\n" "$MENU_BACK"
+    echo
+    read -rp "$(printf "${BOLD}$PROMPT_CHOICE${RESET} ")" c
+    case "$c" in
+      1) run_action action_up ;;
+      2) run_action action_down ;;
+      3) run_action action_build ;;
+      4) run_action action_pull ;;
+      5) run_action action_status ;;
+      6) run_action action_clone_update ;;
+      0|q|Q) return ;;
+      *) warn "$WARN_UNKNOWN_CHOICE"; pause ;;
+    esac
+  done
+}
+
+# Tools submenu
+menu_tools(){
+  while true; do
+    clear; print_banner
+    echo
+    printf "  ${BOLD}$MENU_TOOLS_TITLE${RESET}\n"
+    printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+    echo
+    printf "  ${BOLD}${SECTION_LOGS}${RESET}\n"
+    printf "    ${CYAN}[1]${RESET}  %s\n" "$MENU_LOGS"
+    printf "    ${CYAN}[2]${RESET}  %s\n" "$MENU_LOGS_SAVE"
+    echo
+    printf "  ${BOLD}${SECTION_PODMAN}${RESET}\n"
+    printf "    ${CYAN}[3]${RESET}  %s\n" "$MENU_ENSURE"
+    printf "    ${RED}[4]${RESET}  %s\n" "$MENU_CLEANUP"
+    echo
+    printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+    printf "    ${CYAN}[0]${RESET}  %s\n" "$MENU_BACK"
+    echo
+    read -rp "$(printf "${BOLD}$PROMPT_CHOICE${RESET} ")" c
+    case "$c" in
+      1) action_logs; pause ;;
+      2) action_export_logs_as_json; pause ;;
+      3) run_action action_ensure_all ;;
+      4) action_cleanup_podman; pause ;;
+      0|q|Q) return ;;
+      *) warn "$WARN_UNKNOWN_CHOICE"; pause ;;
+    esac
+  done
 }
 
 # ==================== Entry Point ====================
@@ -1037,22 +1188,16 @@ while true; do
   read -rp "$(printf "${BOLD}$PROMPT_CHOICE${RESET} ")" c
   case "$c" in
     1) run_action action_full_run ;;
-    2) run_action action_ensure_all ;;
-    3) run_action action_clone_update ;;
-    4) run_action action_up ;;
-    5) run_action action_down ;;
-    6) run_action action_build ;;
-    7) run_action action_pull ;;
-    8) action_logs; pause ;;
-    L|l) action_logs_snapshot ;;
-    9) run_action action_status ;;
-    T|t) choose_technology; clear; print_banner ;;
-    F|f) choose_frontend;  clear; print_banner ;;
+    S|s) menu_stack ;;
+    A|a) action_api_info; pause ;;
     D|d) run_action action_run_docs ;;
-    M|m) prompt_for_language; clear; print_banner ;;
+    T|t) choose_technology ;;
+    F|f) choose_frontend ;;
+    M|m) prompt_for_language ;;
+    X|x) menu_tools ;;
     0) run_action action_open ;;
-    C|c) action_cleanup_podman; pause ;;
     q|Q) echo "Bye!"; exit 0 ;;
     *)   warn "$WARN_UNKNOWN_CHOICE"; pause ;;
   esac
+  clear; print_banner
 done
