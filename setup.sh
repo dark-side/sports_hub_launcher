@@ -148,12 +148,15 @@ set_lang_uk(){
   MENU_8_LOGS="Меню логів"; MENU_L_LOGS_SNAPSHOT="Логи (останні 200)"; MENU_9_STATUS="Статус (ps)";
   MENU_T_CHOOSE_TECH="Змінити технологію"; MENU_F_CHOOSE_FRONTEND="Змінити фронтенд"; MENU_M_CHOOSE_LANG="Змінити мову";
   MENU_D_VIEW_DOCS="Відкрити документацію"; MENU_0_OPEN="Відкрити у браузері"; MENU_Q_QUIT="Вихід";
+  MENU_C_CLEANUP="Очистити Podman (повний reset)";
   FRONTEND_BANNER_TITLE="Фронтенд"; FRONTEND_CURRENT="поточний:"; FRONTEND_PROMPT="Оберіть фронтенд:";
   TECH_BANNER_TITLE="Технологія"; TECH_CURRENT="поточна:"; TECH_PROMPT="Оберіть технологію (бекенд):";
   MSG_FRONTEND_SET="Фронтенд встановлено:"; MSG_TECH_SET="Технологію встановлено:"; MSG_ACTION_FAILED="Дія завершилась з кодом";
   WARN_NO_COMPOSE="Не знайдено 'podman compose' або 'podman-compose'.";
   LOG_MENU_PROMPT="Що зробити з логами?"; LOG_MENU_VIEW="Переглянути логи в терміналі"; LOG_MENU_SAVE="Зберегти логи у JSON файл"; LOG_MENU_BACK="Назад";
   LOG_SAVED_TO="Логи збережено у файл:"; MSG_STARTING_DOCS="Запускаю сервіс документації...";
+  MSG_CLEANUP_WARN="УВАГА: Це видалить ВСІ контейнери, образи та Podman machine!";
+  MSG_CLEANUP_CONFIRM="Продовжити? (y/N):"; MSG_CLEANUP_DONE="Podman повністю очищено.";
 }
 set_lang_en(){
   MSG_LOGS_SAVED="Logs saved to:"; PROMPT_PRESS_ENTER="Press Enter..."; PROMPT_CHOICE="> Your choice:"; WARN_UNKNOWN_CHOICE="Unknown choice";
@@ -163,12 +166,15 @@ set_lang_en(){
   MENU_8_LOGS="Logs Menu"; MENU_L_LOGS_SNAPSHOT="Logs (last 200)"; MENU_9_STATUS="Status (ps)";
   MENU_T_CHOOSE_TECH="Change technology"; MENU_F_CHOOSE_FRONTEND="Change frontend"; MENU_M_CHOOSE_LANG="Change language";
   MENU_D_VIEW_DOCS="Open Documentation"; MENU_0_OPEN="Open in browser"; MENU_Q_QUIT="Quit";
+  MENU_C_CLEANUP="Cleanup Podman (full reset)";
   FRONTEND_BANNER_TITLE="Frontend"; FRONTEND_CURRENT="current:"; FRONTEND_PROMPT="Choose a frontend:";
   TECH_BANNER_TITLE="Technology"; TECH_CURRENT="current:"; TECH_PROMPT="Choose a backend technology:";
   MSG_FRONTEND_SET="Frontend set to:"; MSG_TECH_SET="Technology set to:"; MSG_ACTION_FAILED="Action finished with code";
   WARN_NO_COMPOSE="Could not find 'podman compose' or 'podman-compose'.";
   LOG_MENU_PROMPT="What to do with logs?"; LOG_MENU_VIEW="View logs in terminal"; LOG_MENU_SAVE="Save logs to JSON file"; LOG_MENU_BACK="Back";
   LOG_SAVED_TO="Logs saved to file:"; MSG_STARTING_DOCS="Starting documentation service...";
+  MSG_CLEANUP_WARN="WARNING: This will remove ALL containers, images and Podman machine!";
+  MSG_CLEANUP_CONFIRM="Continue? (y/N):"; MSG_CLEANUP_DONE="Podman fully cleaned up.";
 }
 
 # ==================== UI / helpers ====================
@@ -882,6 +888,56 @@ action_run_docs() {
   open_url "$DOCS_URL"
 }
 
+# ==================== Podman Cleanup ====================
+action_cleanup_podman() {
+  echo
+  warn "$MSG_CLEANUP_WARN"
+  echo
+  printf "  ${YELLOW}podman stop -a${RESET}           - Stop all containers\n"
+  printf "  ${YELLOW}podman rm -a${RESET}             - Remove all containers\n"
+  printf "  ${YELLOW}podman rmi -a -f${RESET}         - Remove all images\n"
+  printf "  ${YELLOW}podman system prune -a -f${RESET} - Prune system\n"
+  printf "  ${YELLOW}podman machine rm -f${RESET}     - Remove Podman VM\n"
+  echo
+
+  read -rp "$(printf "${BOLD}$MSG_CLEANUP_CONFIRM${RESET} ")" confirm
+  if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+    log "Cleanup cancelled."
+    return 0
+  fi
+
+  log "Stopping all containers..."
+  podman stop -a 2>/dev/null || true
+
+  log "Removing all containers..."
+  podman rm -a 2>/dev/null || true
+
+  log "Removing all images..."
+  podman rmi -a -f 2>/dev/null || true
+
+  log "Pruning system..."
+  podman system prune -a -f 2>/dev/null || true
+
+  if [[ "$(platform_os)" == "mac" || "$(platform_os)" == "win" ]]; then
+    log "Removing Podman machine..."
+    podman machine stop 2>/dev/null || true
+    podman machine rm -f 2>/dev/null || true
+  fi
+
+  read -rp "$(printf "${BOLD}Remove Podman config files too? (~/.config/containers, etc.) (y/N):${RESET} ")" rm_config
+  if [[ "$rm_config" =~ ^[Yy]$ ]]; then
+    log "Removing Podman config directories..."
+    rm -rf ~/.config/containers ~/.local/share/containers ~/.cache/podman 2>/dev/null || true
+    
+    if [[ "$(platform_os)" == "mac" ]]; then
+      hint "To fully uninstall Podman: ${BOLD}brew uninstall podman qemu lima${RESET}"
+    fi
+  fi
+
+  ok "$MSG_CLEANUP_DONE"
+  hint "Run option [2] to reinstall Podman when needed."
+}
+
 # ==================== Menus ====================
 choose_technology(){
   clear; print_banner; printf "${CYAN}${BOLD}${TECH_BANNER_TITLE}${RESET}\n";
@@ -930,6 +986,7 @@ print_menu(){
   printf "  ${CYAN}[D]${RESET} %s\n" "$MENU_D_VIEW_DOCS"
   printf "  ${CYAN}[M]${RESET} %s\n" "$MENU_M_CHOOSE_LANG"
   printf "  ${CYAN}[0]${RESET} %s\n" "$MENU_0_OPEN"
+  printf "  ${CYAN}[C]${RESET} %s\n" "$MENU_C_CLEANUP"
   printf "  ${CYAN}[q]${RESET} %s\n" "$MENU_Q_QUIT"
   echo
 }
@@ -994,6 +1051,7 @@ while true; do
     D|d) run_action action_run_docs ;;
     M|m) prompt_for_language; clear; print_banner ;;
     0) run_action action_open ;;
+    C|c) action_cleanup_podman; pause ;;
     q|Q) echo "Bye!"; exit 0 ;;
     *)   warn "$WARN_UNKNOWN_CHOICE"; pause ;;
   esac
