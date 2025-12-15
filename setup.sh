@@ -160,13 +160,39 @@ set_lang_uk(){
   FRONTEND_PROMPT="Оберіть фронтенд"; TECH_PROMPT="Оберіть технологію бекенду";
   MSG_FRONTEND_SET="Фронтенд встановлено:"; MSG_TECH_SET="Технологію встановлено:";
   MSG_ACTION_FAILED="Дія завершилась з кодом"; WARN_NO_COMPOSE="Не знайдено 'podman compose'.";
-  LOG_MENU_PROMPT="Що зробити з логами?"; LOG_MENU_VIEW="Переглянути"; LOG_MENU_SAVE="Зберегти (JSON)"; LOG_MENU_BACK="Назад";
+  LOG_MENU_PROMPT="Що зробити з логами?"; LOG_MENU_VIEW="Переглянути (live)"; LOG_MENU_SAVE="Зберегти (JSON)"; LOG_MENU_BACK="Назад";
+  LOG_MENU_BACKEND="Тільки Backend"; LOG_MENU_FRONTEND="Тільки Frontend"; LOG_MENU_DB="Тільки Database"; LOG_MENU_TAIL="Останні N рядків";
   LOG_SAVED_TO="Логи збережено:"; MSG_STARTING_DOCS="Запускаю документацію...";
   MSG_CLEANUP_WARN="УВАГА: Видалить ВСІ контейнери, образи та Podman!";
   MSG_CLEANUP_CONFIRM="Продовжити? (y/N):"; MSG_CLEANUP_DONE="Podman очищено.";
   # Section headers
   SECTION_MAIN="ОСНОВНЕ"; SECTION_RESOURCES="РЕСУРСИ"; SECTION_SETTINGS="НАЛАШТУВАННЯ";
   SECTION_STACK_OPS="ОПЕРАЦІЇ"; SECTION_LOGS="ЛОГИ"; SECTION_PODMAN="PODMAN";
+  SECTION_MOBILE="ДЛЯ МОБАЙЛ ДЕВІВ";
+  # New features
+  MENU_HEALTH="Перевірка API"; MENU_RESET_DB="Скинути базу даних";
+  MENU_EXPORT_ENV="Експорт .env для мобайл"; MENU_HELP="Довідка / Quick Start";
+  MSG_HEALTH_OK="API працює!"; MSG_HEALTH_FAIL="API не відповідає";
+  MSG_RESET_DB_WARN="УВАГА: Це видалить всі дані з бази!";
+  MSG_RESET_DB_CONFIRM="Скинути базу? (y/N):";
+  MSG_RESET_DB_DONE="Базу даних скинуто.";
+  MSG_ENV_EXPORTED=".env файл експортовано:";
+  # Full run completion
+  MSG_SUCCESS="Успіх!"; MSG_APP_RUNNING="Ваш додаток працює на";
+  MSG_VIEW_LOGS="Переглянути логи"; MSG_RETURN_MENU="Повернутися в меню";
+  MSG_LIVE_LOGS="Логи (Ctrl+C для виходу)";
+  # Full run steps
+  MSG_FULL_SETUP_TITLE="Повний запуск";
+  MSG_FULL_SETUP_DESC="Це займе кілька хвилин. Ось що відбудеться:";
+  MSG_STEP_1="Перевірка та встановлення Podman";
+  MSG_STEP_2="Завантаження коду з GitHub";
+  MSG_STEP_3="Збірка та запуск контейнерів";
+  MSG_STEP_4="Очікування готовності додатку";
+  MSG_STEP_5="Відкриття у браузері";
+  MSG_PODMAN_READY="Podman готовий!";
+  MSG_CODE_DOWNLOADED="Код завантажено!";
+  MSG_CONTAINERS_STARTED="Контейнери запущено!";
+  MSG_APP_READY="Додаток готовий!";
 }
 set_lang_en(){
   MSG_LOGS_SAVED="Logs saved to:"; PROMPT_PRESS_ENTER="Press Enter..."; PROMPT_CHOICE="> Your choice:"; WARN_UNKNOWN_CHOICE="Unknown choice";
@@ -188,13 +214,39 @@ set_lang_en(){
   FRONTEND_PROMPT="Choose frontend"; TECH_PROMPT="Choose backend technology";
   MSG_FRONTEND_SET="Frontend set to:"; MSG_TECH_SET="Technology set to:";
   MSG_ACTION_FAILED="Action failed with code"; WARN_NO_COMPOSE="Could not find 'podman compose'.";
-  LOG_MENU_PROMPT="Logs:"; LOG_MENU_VIEW="View"; LOG_MENU_SAVE="Save (JSON)"; LOG_MENU_BACK="Back";
+  LOG_MENU_PROMPT="Logs:"; LOG_MENU_VIEW="View (live)"; LOG_MENU_SAVE="Save (JSON)"; LOG_MENU_BACK="Back";
+  LOG_MENU_BACKEND="Backend only"; LOG_MENU_FRONTEND="Frontend only"; LOG_MENU_DB="Database only"; LOG_MENU_TAIL="Last N lines";
   LOG_SAVED_TO="Logs saved:"; MSG_STARTING_DOCS="Starting docs...";
   MSG_CLEANUP_WARN="WARNING: Will remove ALL containers, images and Podman!";
   MSG_CLEANUP_CONFIRM="Continue? (y/N):"; MSG_CLEANUP_DONE="Podman cleaned up.";
   # Section headers
   SECTION_MAIN="MAIN"; SECTION_RESOURCES="RESOURCES"; SECTION_SETTINGS="SETTINGS";
   SECTION_STACK_OPS="OPERATIONS"; SECTION_LOGS="LOGS"; SECTION_PODMAN="PODMAN";
+  SECTION_MOBILE="FOR MOBILE DEVS";
+  # New features
+  MENU_HEALTH="API Health Check"; MENU_RESET_DB="Reset Database";
+  MENU_EXPORT_ENV="Export .env for mobile"; MENU_HELP="Help / Quick Start";
+  MSG_HEALTH_OK="API is working!"; MSG_HEALTH_FAIL="API is not responding";
+  MSG_RESET_DB_WARN="WARNING: This will delete all data from the database!";
+  MSG_RESET_DB_CONFIRM="Reset database? (y/N):";
+  MSG_RESET_DB_DONE="Database has been reset.";
+  MSG_ENV_EXPORTED=".env file exported to:";
+  # Full run completion
+  MSG_SUCCESS="Success!"; MSG_APP_RUNNING="Your application is running at";
+  MSG_VIEW_LOGS="View live logs"; MSG_RETURN_MENU="Return to menu";
+  MSG_LIVE_LOGS="Live Logs (Press Ctrl+C to exit)";
+  # Full run steps
+  MSG_FULL_SETUP_TITLE="Starting Full Setup";
+  MSG_FULL_SETUP_DESC="This will take a few minutes. Here's what will happen:";
+  MSG_STEP_1="Check and install Podman (container engine)";
+  MSG_STEP_2="Download project code from GitHub";
+  MSG_STEP_3="Build and start containers";
+  MSG_STEP_4="Wait for application to be ready";
+  MSG_STEP_5="Open in your browser";
+  MSG_PODMAN_READY="Podman is ready!";
+  MSG_CODE_DOWNLOADED="Code downloaded!";
+  MSG_CONTAINERS_STARTED="Containers started!";
+  MSG_APP_READY="Application is ready!";
 }
 
 # ==================== UI / helpers ====================
@@ -218,6 +270,35 @@ print_banner(){
                                                         setup (Podman)
 ASCII
   printf "${RESET}\n"
+}
+
+show_welcome_screen() {
+  local is_first_run="$1"
+  if [[ "$is_first_run" != "true" ]]; then return 0; fi
+  
+  clear; print_banner
+  echo
+  printf "${BOLD}${GREEN}Welcome to Sports Hub Setup!${RESET}\n"
+  printf "${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  echo
+  printf "This tool will help you set up and run Sports Hub projects.\n"
+  printf "Don't worry if you're new to containers - we'll handle everything!\n"
+  echo
+  printf "${BOLD}What this tool does:${RESET}\n"
+  printf "  ${GREEN}✓${RESET} Installs required tools automatically\n"
+  printf "  ${GREEN}✓${RESET} Downloads project code\n"
+  printf "  ${GREEN}✓${RESET} Starts the application\n"
+  printf "  ${GREEN}✓${RESET} Opens it in your browser\n"
+  echo
+  printf "${BOLD}You'll need to:${RESET}\n"
+  printf "  1. Choose your preferred language\n"
+  printf "  2. Select backend technology (e.g., Python, Java)\n"
+  printf "  3. Select frontend framework (React or Angular)\n"
+  printf "  4. Press [1] for Full Start - that's it!\n"
+  echo
+  printf "${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  echo
+  read -rp "$(printf "${BOLD}Press Enter to continue...${RESET}")" _
 }
 
 prompt_for_language() {
@@ -270,11 +351,25 @@ diagnose_podman_issue() {
   fi
 
   if echo "$error_output" | grep -qi "VM does not exist"; then
-    err "Podman VM is not initialized"
-    hint "Solution:"
-    hint "  1. Run: ${BOLD}podman machine init${RESET}"
-    hint "  2. Then: ${BOLD}podman machine start${RESET}"
-    hint "  3. Or try option [2] in the menu for automatic setup"
+    warn "Podman VM is missing or corrupted. Attempting automatic recovery..."
+    echo
+    
+    # Try to recreate the machine
+    log "Initializing new Podman machine..."
+    if podman machine init --cpus 4 --memory 4096 2>&1; then
+      ok "Machine initialized"
+      log "Starting Podman machine..."
+      if podman machine start 2>&1; then
+        ok "Podman machine recovered successfully!"
+        return 0
+      fi
+    fi
+    
+    err "Automatic recovery failed"
+    hint "Manual solution:"
+    hint "  1. Run: ${BOLD}podman machine rm -f podman-machine-default${RESET}"
+    hint "  2. Then: ${BOLD}podman machine init${RESET}"
+    hint "  3. Then: ${BOLD}podman machine start${RESET}"
     return 1
   fi
   
@@ -290,13 +385,23 @@ diagnose_podman_issue() {
         echo "$machine_status"
         
         if echo "$machine_status" | grep -qi "Currently running"; then
-          warn "Machine is running but connection issues exist"
-          hint "Try restarting Podman machine:"
-          hint "  ${BOLD}podman machine stop && podman machine start${RESET}"
+          warn "Machine is running but connection issues exist. Attempting restart..."
+          if podman machine stop 2>&1 && podman machine start 2>&1; then
+            ok "Podman machine restarted successfully!"
+            return 0
+          else
+            err "Restart failed"
+            hint "Try manually: ${BOLD}podman machine stop && podman machine start${RESET}"
+          fi
         else
-          warn "Podman machine is not running"
-          hint "Try starting it:"
-          hint "  ${BOLD}podman machine start${RESET}"
+          warn "Podman machine is not running. Starting..."
+          if podman machine start 2>&1; then
+            ok "Podman machine started successfully!"
+            return 0
+          else
+            err "Failed to start machine"
+            hint "Try: ${BOLD}podman machine start${RESET}"
+          fi
         fi
       else
         err "Podman machine not initialized"
@@ -784,11 +889,63 @@ action_open(){
 }
 
 action_full_run(){
+  clear; print_banner
+  echo
+  printf "${BOLD}${GREEN}$MSG_FULL_SETUP_TITLE${RESET}\n"
+  printf "${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  echo
+  printf "$MSG_FULL_SETUP_DESC\n"
+  echo
+  printf "  ${CYAN}[1/5]${RESET} %s\n" "$MSG_STEP_1"
+  printf "  ${CYAN}[2/5]${RESET} %s\n" "$MSG_STEP_2"
+  printf "  ${CYAN}[3/5]${RESET} %s\n" "$MSG_STEP_3"
+  printf "  ${CYAN}[4/5]${RESET} %s\n" "$MSG_STEP_4"
+  printf "  ${CYAN}[5/5]${RESET} %s\n" "$MSG_STEP_5"
+  echo
+  printf "${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  echo
+  pause
+  
+  echo
+  log "[1/5] $MSG_STEP_1..."
   ensure_engine_ready
+  ok "$MSG_PODMAN_READY"
+  echo
+  
+  log "[2/5] $MSG_STEP_2..."
   action_clone_update
+  ok "$MSG_CODE_DOWNLOADED"
+  echo
+  
+  log "[3/5] $MSG_STEP_3..."
   action_up
+  ok "$MSG_CONTAINERS_STARTED"
+  echo
+  
+  log "[4/5] $MSG_STEP_4..."
   wait_for_url "$WAIT_URL" "$WAIT_TIMEOUT" || true
+  ok "$MSG_APP_READY"
+  echo
+  
+  log "[5/5] $MSG_STEP_5..."
   action_open
+  echo
+  ok "${GREEN}${BOLD}$MSG_SUCCESS${RESET} $MSG_APP_RUNNING ${BOLD}$WAIT_URL${RESET}"
+  echo
+  printf "${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  echo
+  printf "  ${CYAN}[L]${RESET}  %s\n" "$MSG_VIEW_LOGS"
+  printf "  ${CYAN}[Enter]${RESET}  %s\n" "$MSG_RETURN_MENU"
+  echo
+  printf "${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  echo
+  read -rp "$(printf "${BOLD}$PROMPT_CHOICE${RESET} ")" log_choice
+  case "$log_choice" in
+    L|l)
+      printf "\n${BOLD}$MSG_LIVE_LOGS${RESET}\n\n"
+      ( cd "$TARGET_DIR" && $CMD logs -f ) || true
+      ;;
+  esac
 }
 
 open_url(){
@@ -803,17 +960,51 @@ open_url(){
 action_logs() {
   ensure_engine_ready || return 1
   set_target_dir || return 1
-  clear; print_banner
-  printf "${BOLD}$LOG_MENU_PROMPT${RESET}\n"
-  local options=("$LOG_MENU_VIEW" "$LOG_MENU_SAVE" "$LOG_MENU_BACK")
-  select opt in "${options[@]}"; do
-    case $opt in
-      "$LOG_MENU_VIEW") ( cd "$TARGET_DIR" && $CMD logs -f ) || true; break ;;
-      "$LOG_MENU_SAVE") action_export_logs_as_json; break ;;
-      "$LOG_MENU_BACK") break ;;
-      *) warn "$WARN_UNKNOWN_CHOICE" ;;
+  
+  while true; do
+    clear; print_banner
+    echo
+    printf "  ${BOLD}${SECTION_LOGS}${RESET}\n"
+    printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+    echo
+    printf "  ${BOLD}Live Logs${RESET}\n"
+    printf "    ${CYAN}[1]${RESET}  %s\n" "$LOG_MENU_VIEW"
+    printf "    ${CYAN}[2]${RESET}  %s\n" "$LOG_MENU_BACKEND"
+    printf "    ${CYAN}[3]${RESET}  %s\n" "$LOG_MENU_FRONTEND"
+    printf "    ${CYAN}[4]${RESET}  %s\n" "$LOG_MENU_DB"
+    echo
+    printf "  ${BOLD}Other${RESET}\n"
+    printf "    ${CYAN}[5]${RESET}  %s\n" "$LOG_MENU_TAIL"
+    printf "    ${CYAN}[6]${RESET}  %s\n" "$LOG_MENU_SAVE"
+    echo
+    printf "    ${CYAN}[0]${RESET}  %s\n" "$LOG_MENU_BACK"
+    echo
+    printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+    echo
+    read -rp "$(printf "${BOLD}$PROMPT_CHOICE${RESET} ")" c
+    case "$c" in
+      1) printf "\n${BOLD}Live Logs${RESET} (Ctrl+C to exit)\n\n"; ( cd "$TARGET_DIR" && $CMD logs -f ) || true ;;
+      2) printf "\n${BOLD}Backend Logs${RESET} (Ctrl+C to exit)\n\n"; ( cd "$TARGET_DIR" && $CMD logs -f backend ) || true ;;
+      3) printf "\n${BOLD}Frontend Logs${RESET} (Ctrl+C to exit)\n\n"; ( cd "$TARGET_DIR" && $CMD logs -f react_frontend ) || true ;;
+      4) printf "\n${BOLD}Database Logs${RESET} (Ctrl+C to exit)\n\n"; ( cd "$TARGET_DIR" && $CMD logs -f db ) || true ;;
+      5) action_logs_tail ;;
+      6) action_export_logs_as_json ;;
+      0|q|Q) return ;;
+      *) warn "$WARN_UNKNOWN_CHOICE"; pause ;;
     esac
   done
+}
+
+action_logs_tail() {
+  local lines
+  read -rp "$(printf "${BOLD}Number of lines (default 100):${RESET} ")" lines
+  lines="${lines:-100}"
+  clear
+  printf "${BOLD}Last $lines lines${RESET}\n"
+  printf "${CYAN}═══════════════════════════════════════════════════════${RESET}\n\n"
+  ( cd "$TARGET_DIR" && $CMD logs --tail="$lines" ) || true
+  echo
+  pause
 }
 
 action_export_logs_as_json() {
@@ -947,6 +1138,24 @@ action_api_info() {
   printf "  ${BOLD}Documentation${RESET}\n"
   printf "    URL:  ${GREEN}http://localhost:5173${RESET} (run [D] to start)\n"
   echo
+  printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  echo
+  printf "  ${BOLD}Registration Requirements${RESET} ${YELLOW}(422 errors? check this)${RESET}\n"
+  printf "    - email:    valid format (user@domain.com)\n"
+  printf "    - password: min 8 chars, 1 uppercase, 1 number\n"
+  printf "    - password_confirmation: must match password\n"
+  echo
+  printf "  ${BOLD}Example Registration${RESET}\n"
+  printf "    ${YELLOW}curl -X POST http://localhost:${api_port}/users/registrations \\${RESET}\n"
+  printf "    ${YELLOW}  -H \"Content-Type: application/json\" \\${RESET}\n"
+  printf "    ${YELLOW}  -d '{\"email\":\"test@example.com\",\"password\":\"Password1\",\"password_confirmation\":\"Password1\"}'${RESET}\n"
+  echo
+  printf "  ${RED}⚠ Important for Mobile Devs${RESET}\n"
+  printf "    ID field type varies by backend technology:\n"
+  printf "    - Java, Python, Ruby: ${CYAN}id${RESET} is ${YELLOW}integer${RESET}\n"
+  printf "    - Some backends may return ${CYAN}id${RESET} as ${YELLOW}string${RESET}\n"
+  printf "    ${BOLD}Recommendation:${RESET} Parse ID as String in your mobile app\n"
+  echo
 }
 
 # ==================== Podman Cleanup ====================
@@ -1008,6 +1217,162 @@ action_cleanup_podman() {
   hint "Run option [2] to reinstall Podman when needed."
 }
 
+# ==================== Health Check ====================
+action_health_check() {
+  local api_port="3002"
+  local api_url="http://localhost:${api_port}"
+  
+  echo
+  log "Checking API health at ${BOLD}${api_url}${RESET}..."
+  echo
+  
+  # Check main API endpoint
+  printf "  %-30s" "Backend API..."
+  if curl -s --max-time 5 "${api_url}/api/articles" >/dev/null 2>&1; then
+    printf "${GREEN}OK${RESET}\n"
+  else
+    printf "${RED}FAIL${RESET}\n"
+  fi
+  
+  # Check specific endpoints
+  local endpoints=("/api/articles" "/api/users")
+  for ep in "${endpoints[@]}"; do
+    printf "  %-30s" "  ${ep}..."
+    local response
+    response=$(curl -s --max-time 5 -w "%{http_code}" -o /dev/null "${api_url}${ep}" 2>/dev/null || echo "000")
+    if [[ "$response" == "200" || "$response" == "201" ]]; then
+      printf "${GREEN}${response}${RESET}\n"
+    elif [[ "$response" == "000" ]]; then
+      printf "${RED}NO RESPONSE${RESET}\n"
+    else
+      printf "${YELLOW}${response}${RESET}\n"
+    fi
+  done
+  
+  # Check frontend
+  printf "  %-30s" "Frontend (port 3000)..."
+  if curl -s --max-time 5 "http://localhost:3000" >/dev/null 2>&1; then
+    printf "${GREEN}OK${RESET}\n"
+  else
+    printf "${RED}FAIL${RESET}\n"
+  fi
+  
+  # Check docs if running
+  printf "  %-30s" "Docs (port 5173)..."
+  if curl -s --max-time 5 "http://localhost:5173" >/dev/null 2>&1; then
+    printf "${GREEN}OK${RESET}\n"
+  else
+    printf "${YELLOW}NOT RUNNING${RESET}\n"
+  fi
+  
+  echo
+}
+
+# ==================== Reset Database ====================
+action_reset_db() {
+  echo
+  warn "$MSG_RESET_DB_WARN"
+  echo
+  
+  read -rp "$(printf "${BOLD}$MSG_RESET_DB_CONFIRM${RESET} ")" confirm
+  if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+    log "Reset cancelled."
+    return 0
+  fi
+  
+  set_target_dir || return 1
+  
+  log "Stopping containers..."
+  (cd "$TARGET_DIR" && $CMD down -v 2>/dev/null) || true
+  
+  log "Removing database volumes..."
+  podman volume ls -q | grep -E "(db|postgres|mysql|mongo)" | xargs -r podman volume rm -f 2>/dev/null || true
+  
+  log "Starting fresh..."
+  (cd "$TARGET_DIR" && $CMD up -d --build) || {
+    err "Failed to restart containers"
+    return 1
+  }
+  
+  ok "$MSG_RESET_DB_DONE"
+}
+
+# ==================== Export .env for Mobile ====================
+action_export_env() {
+  local api_port="3002"
+  local output_dir="$HOME/Desktop"
+  local output_file="$output_dir/sportshub_mobile.env"
+  
+  # Create .env content for mobile developers
+  cat > "$output_file" << EOF
+# Sports Hub - Mobile Development Environment
+# Generated: $(date)
+# Technology: $CURRENT_TECH
+
+# API Configuration
+API_BASE_URL=http://localhost:${api_port}
+API_VERSION=v1
+
+# Endpoints
+ENDPOINT_ARTICLES=/api/articles
+ENDPOINT_USERS=/api/users
+ENDPOINT_AUTH=/api/auth/sign_in
+ENDPOINT_REGISTER=/users/registrations
+
+# For Android Emulator use:
+# API_BASE_URL=http://10.0.2.2:${api_port}
+
+# For iOS Simulator use:
+# API_BASE_URL=http://localhost:${api_port}
+
+# For Physical Device (replace with your machine's IP):
+# API_BASE_URL=http://YOUR_LOCAL_IP:${api_port}
+
+# Example: Get your local IP with:
+# macOS: ipconfig getifaddr en0
+# Linux: hostname -I | awk '{print \$1}'
+EOF
+
+  ok "$MSG_ENV_EXPORTED ${BOLD}$output_file${RESET}"
+  echo
+  printf "  ${CYAN}Tip:${RESET} Copy this file to your mobile project\n"
+  echo
+}
+
+# ==================== Help / Quick Start ====================
+action_help() {
+  clear; print_banner
+  echo
+  printf "  ${BOLD}Quick Start Guide${RESET}\n"
+  printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  echo
+  printf "  ${BOLD}For Mobile Developers:${RESET}\n"
+  printf "    1. Press ${GREEN}[1]${RESET} to start the full stack\n"
+  printf "    2. Wait for containers to start (~2-3 min first time)\n"
+  printf "    3. API will be available at ${GREEN}http://localhost:3002${RESET}\n"
+  printf "    4. Press ${CYAN}[E]${RESET} to export .env for your mobile project\n"
+  echo
+  printf "  ${BOLD}Common Tasks:${RESET}\n"
+  printf "    ${GREEN}[1]${RESET}  Full Start    - Clone repos, build & run everything\n"
+  printf "    ${CYAN}[S]${RESET}  Stack         - Start/stop/rebuild containers\n"
+  printf "    ${CYAN}[A]${RESET}  API Info      - View endpoints and examples\n"
+  printf "    ${CYAN}[H]${RESET}  Health Check  - Verify API is responding\n"
+  printf "    ${CYAN}[X]${RESET}  Tools         - Logs, Podman management\n"
+  echo
+  printf "  ${BOLD}Troubleshooting:${RESET}\n"
+  printf "    - ${YELLOW}422 on registration?${RESET} Check password requirements\n"
+  printf "    - ${YELLOW}API not responding?${RESET} Run ${CYAN}[H]${RESET} to check health\n"
+  printf "    - ${YELLOW}Containers failing?${RESET} Try ${CYAN}[S]${RESET} -> ${CYAN}[3]${RESET} Rebuild\n"
+  printf "    - ${YELLOW}Complete reset?${RESET} Use ${CYAN}[X]${RESET} -> ${RED}[4]${RESET} Cleanup Podman\n"
+  echo
+  printf "  ${BOLD}Keyboard Shortcuts:${RESET}\n"
+  printf "    ${CYAN}[T]${RESET} Change backend    ${CYAN}[F]${RESET} Change frontend\n"
+  printf "    ${CYAN}[M]${RESET} Change language   ${RED}[Q]${RESET} Quit\n"
+  echo
+  printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  echo
+}
+
 # ==================== Menus ====================
 choose_technology(){
   clear; print_banner
@@ -1064,8 +1429,13 @@ print_menu(){
   echo
   printf "  ${BOLD}${SECTION_RESOURCES}${RESET}\n"
   printf "    ${CYAN}[A]${RESET}  %s\n" "$MENU_A_API"
+  printf "    ${CYAN}[H]${RESET}  %s\n" "$MENU_HEALTH"
   printf "    ${CYAN}[D]${RESET}  %s\n" "$MENU_D_VIEW_DOCS"
   printf "    ${CYAN}[0]${RESET}  %s\n" "$MENU_0_OPEN"
+  echo
+  printf "  ${BOLD}${SECTION_MOBILE}${RESET}\n"
+  printf "    ${CYAN}[E]${RESET}  %s\n" "$MENU_EXPORT_ENV"
+  printf "    ${YELLOW}[R]${RESET}  %s\n" "$MENU_RESET_DB"
   echo
   printf "  ${BOLD}${SECTION_SETTINGS}${RESET}\n"
   printf "    ${YELLOW}[T]${RESET}  %s\n" "$MENU_TECH"
@@ -1073,6 +1443,7 @@ print_menu(){
   printf "    ${YELLOW}[M]${RESET}  %s\n" "$MENU_LANG"
   echo
   printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  printf "    ${CYAN}[?]${RESET}  %s\n" "$MENU_HELP"
   printf "    ${RED}[Q]${RESET}  %s\n" "$MENU_Q_QUIT"
   echo
 }
@@ -1143,6 +1514,13 @@ menu_tools(){
 }
 
 # ==================== Entry Point ====================
+# Check if this is first run
+IS_FIRST_RUN="false"
+if [ ! -f "$TECH_FILE" ] && [ -z "$CLI_TECH" ]; then
+  IS_FIRST_RUN="true"
+fi
+
+show_welcome_screen "$IS_FIRST_RUN"
 prompt_for_language
 
 # Use CLI args if provided, otherwise read from config
@@ -1153,7 +1531,16 @@ else
 fi
 
 if [ -z "$CURRENT_TECH_KEY" ]; then
-  log "No technology selected yet. Please choose one."
+  clear; print_banner
+  echo
+  printf "${BOLD}${GREEN}Step 2 of 3: Choose Backend Technology${RESET}\n"
+  printf "${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  echo
+  printf "Select the programming language for your backend.\n"
+  printf "${CYAN}Tip:${RESET} If unsure, Python or Node.js are great starting points!\n"
+  echo
+  pause
+  
   while [ -z "$CURRENT_TECH_KEY" ]; do
     choose_technology
     CURRENT_TECH_KEY="$(cat "$TECH_FILE" 2>/dev/null || true)"
@@ -1172,6 +1559,21 @@ else
   CURRENT_FRONTEND_NAME="$(cat "$FRONTEND_FILE" 2>/dev/null || true)"
 fi
 
+# Show frontend selection hint on first run
+if [[ "$IS_FIRST_RUN" == "true" ]] && [ -z "$CURRENT_FRONTEND_NAME" ]; then
+  clear; print_banner
+  echo
+  printf "${BOLD}${GREEN}Step 3 of 3: Choose Frontend Framework${RESET}\n"
+  printf "${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  echo
+  printf "Select the frontend framework for your application.\n"
+  printf "${CYAN}Tip:${RESET} React is more popular, Angular is more structured.\n"
+  echo
+  pause
+  choose_frontend
+  CURRENT_FRONTEND_NAME="$(cat "$FRONTEND_FILE" 2>/dev/null || true)"
+fi
+
 apply_tech_selection "$CURRENT_TECH_KEY" "$CURRENT_FRONTEND_NAME"
 
 CMD=$(resolve_compose_cmd)
@@ -1181,21 +1583,50 @@ if [[ "${ENABLE_TEE_LOG:-1}" == "1" ]]; then
   log "$MSG_LOGS_SAVED ${BOLD}$LOG_FILE${RESET}"
 fi
 
+# Show quick start hint for first-time users
+if [[ "$IS_FIRST_RUN" == "true" ]]; then
+  clear; print_banner
+  echo
+  printf "${BOLD}${GREEN}Setup Complete!${RESET}\n"
+  printf "${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  echo
+  printf "You've selected:\n"
+  printf "  ${BOLD}Backend:${RESET}  ${GREEN}$CURRENT_TECH${RESET}\n"
+  printf "  ${BOLD}Frontend:${RESET} ${GREEN}$CURRENT_FRONTEND_NAME${RESET}\n"
+  echo
+  printf "${BOLD}${CYAN}Quick Start:${RESET}\n"
+  printf "  Press ${GREEN}[1]${RESET} for Full Start - this will:\n"
+  printf "    • Install Podman (container engine) if needed\n"
+  printf "    • Download your project code\n"
+  printf "    • Start the application\n"
+  printf "    • Open it in your browser\n"
+  echo
+  printf "  ${CYAN}Note:${RESET} First run may take 5-10 minutes to download everything.\n"
+  echo
+  printf "${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+  echo
+  pause
+fi
+
 clear; print_banner
 
 while true; do
   print_menu
   read -rp "$(printf "${BOLD}$PROMPT_CHOICE${RESET} ")" c
   case "$c" in
-    1) run_action action_full_run ;;
+    1) action_full_run ;;
     S|s) menu_stack ;;
     A|a) action_api_info; pause ;;
-    D|d) run_action action_run_docs ;;
+    H|h) action_health_check; pause ;;
+    D|d) action_run_docs ;;
+    E|e) action_export_env; pause ;;
+    R|r) action_reset_db; pause ;;
     T|t) choose_technology ;;
     F|f) choose_frontend ;;
     M|m) prompt_for_language ;;
     X|x) menu_tools ;;
-    0) run_action action_open ;;
+    0) action_open; pause ;;
+    \?) action_help; pause ;;
     q|Q) echo "Bye!"; exit 0 ;;
     *)   warn "$WARN_UNKNOWN_CHOICE"; pause ;;
   esac
