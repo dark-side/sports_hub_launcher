@@ -142,11 +142,20 @@ post_clone_hook() {
 # ==================== i18n ====================
 set_lang_uk(){
   MSG_LOGS_SAVED="Логи збережено в:"; PROMPT_PRESS_ENTER="Натисніть Enter..."; PROMPT_CHOICE="> Ваш вибір:"; WARN_UNKNOWN_CHOICE="Невідомий вибір";
-  # Main menu
-  MENU_TITLE="Оберіть дію:"; MENU_1_FULL_START="Повний запуск";
-  MENU_S_STACK="Управління Stack"; MENU_T_TOOLS="Інструменти";
-  MENU_A_API="API Info"; MENU_D_VIEW_DOCS="Документація";
-  MENU_0_OPEN="Відкрити у браузері"; MENU_Q_QUIT="Вихід";
+  # Main menu - new structure
+  MENU_TITLE="Оберіть дію:"; MENU_Q_QUIT="Вихід";
+  # Section: ЗАПУСК
+  MENU_1_FULL_START="Повний запуск (автоматично все)";
+  MENU_2_START="Запустити Stack"; MENU_3_STOP="Зупинити Stack";
+  # Section: СТАТУС І ЛОГИ
+  MENU_4_STATUS="Статус контейнерів"; MENU_5_LOGS="Переглянути логи";
+  MENU_6_OPEN="Відкрити у браузері";
+  # Section: ДОКУМЕНТАЦІЯ
+  MENU_7_API="API Info"; MENU_8_DOCS="Документація";
+  # Section: НАЛАШТУВАННЯ (submenu)
+  MENU_9_SETTINGS="Налаштування";
+  # Section: ДОДАТКОВО (submenu)
+  MENU_0_ADVANCED="Розширені інструменти";
   # Stack submenu
   MENU_STACK_TITLE="Управління Stack"; MENU_UP="Запустити"; MENU_DOWN="Зупинити";
   MENU_BUILD="Перезібрати"; MENU_PULL="Pull образів"; MENU_STATUS="Статус";
@@ -165,10 +174,19 @@ set_lang_uk(){
   LOG_SAVED_TO="Логи збережено:"; MSG_STARTING_DOCS="Запускаю документацію...";
   MSG_CLEANUP_WARN="УВАГА: Видалить ВСІ контейнери, образи та Podman!";
   MSG_CLEANUP_CONFIRM="Продовжити? (y/N):"; MSG_CLEANUP_DONE="Podman очищено.";
-  # Section headers
-  SECTION_MAIN="ОСНОВНЕ"; SECTION_RESOURCES="РЕСУРСИ"; SECTION_SETTINGS="НАЛАШТУВАННЯ";
+  # Section headers - new structure
+  SECTION_LAUNCH="ЗАПУСК"; SECTION_STATUS="СТАТУС І ЛОГИ"; SECTION_DOCS="ДОКУМЕНТАЦІЯ";
+  SECTION_SETTINGS="НАЛАШТУВАННЯ"; SECTION_ADVANCED="ДОДАТКОВО";
   SECTION_STACK_OPS="ОПЕРАЦІЇ"; SECTION_LOGS="ЛОГИ"; SECTION_PODMAN="PODMAN";
-  SECTION_MOBILE="ДЛЯ МОБАЙЛ ДЕВІВ";
+  # Settings submenu
+  MENU_SETTINGS_TITLE="Налаштування";
+  MENU_SET_TECH="Змінити технологію"; MENU_SET_FRONTEND="Змінити фронтенд"; MENU_SET_LANG="Змінити мову";
+  # Advanced submenu
+  MENU_ADVANCED_TITLE="Розширені інструменти";
+  MENU_ADV_BUILD="Перезібрати контейнери"; MENU_ADV_PULL="Pull образів";
+  MENU_ADV_CLONE="Клонувати/оновити репо"; MENU_ADV_ENSURE="Перевірити Podman";
+  MENU_ADV_EXPORT_ENV="Експорт .env для мобайл"; MENU_ADV_RESET_DB="Скинути базу даних";
+  MENU_ADV_CLEANUP="Очистити Podman"; MENU_ADV_SAVE_LOGS="Зберегти логи";
   # New features
   MENU_HEALTH="Перевірка API"; MENU_RESET_DB="Скинути базу даних";
   MENU_EXPORT_ENV="Експорт .env для мобайл"; MENU_HELP="Довідка / Quick Start";
@@ -196,11 +214,20 @@ set_lang_uk(){
 }
 set_lang_en(){
   MSG_LOGS_SAVED="Logs saved to:"; PROMPT_PRESS_ENTER="Press Enter..."; PROMPT_CHOICE="> Your choice:"; WARN_UNKNOWN_CHOICE="Unknown choice";
-  # Main menu
-  MENU_TITLE="Select action:"; MENU_1_FULL_START="Full Start";
-  MENU_S_STACK="Manage Stack"; MENU_T_TOOLS="Tools";
-  MENU_A_API="API Info"; MENU_D_VIEW_DOCS="Documentation";
-  MENU_0_OPEN="Open in browser"; MENU_Q_QUIT="Quit";
+  # Main menu - new structure
+  MENU_TITLE="Select action:"; MENU_Q_QUIT="Quit";
+  # Section: LAUNCH
+  MENU_1_FULL_START="Full Start (automatic)";
+  MENU_2_START="Start Stack"; MENU_3_STOP="Stop Stack";
+  # Section: STATUS & LOGS
+  MENU_4_STATUS="Container Status"; MENU_5_LOGS="View Logs";
+  MENU_6_OPEN="Open in Browser";
+  # Section: DOCUMENTATION
+  MENU_7_API="API Info"; MENU_8_DOCS="Documentation";
+  # Section: SETTINGS (submenu)
+  MENU_9_SETTINGS="Settings";
+  # Section: ADVANCED (submenu)
+  MENU_0_ADVANCED="Advanced Tools";
   # Stack submenu
   MENU_STACK_TITLE="Stack Management"; MENU_UP="Start"; MENU_DOWN="Stop";
   MENU_BUILD="Rebuild"; MENU_PULL="Pull images"; MENU_STATUS="Status";
@@ -219,10 +246,19 @@ set_lang_en(){
   LOG_SAVED_TO="Logs saved:"; MSG_STARTING_DOCS="Starting docs...";
   MSG_CLEANUP_WARN="WARNING: Will remove ALL containers, images and Podman!";
   MSG_CLEANUP_CONFIRM="Continue? (y/N):"; MSG_CLEANUP_DONE="Podman cleaned up.";
-  # Section headers
-  SECTION_MAIN="MAIN"; SECTION_RESOURCES="RESOURCES"; SECTION_SETTINGS="SETTINGS";
+  # Section headers - new structure
+  SECTION_LAUNCH="LAUNCH"; SECTION_STATUS="STATUS & LOGS"; SECTION_DOCS="DOCUMENTATION";
+  SECTION_SETTINGS="SETTINGS"; SECTION_ADVANCED="ADVANCED";
   SECTION_STACK_OPS="OPERATIONS"; SECTION_LOGS="LOGS"; SECTION_PODMAN="PODMAN";
-  SECTION_MOBILE="FOR MOBILE DEVS";
+  # Settings submenu
+  MENU_SETTINGS_TITLE="Settings";
+  MENU_SET_TECH="Change Technology"; MENU_SET_FRONTEND="Change Frontend"; MENU_SET_LANG="Change Language";
+  # Advanced submenu
+  MENU_ADVANCED_TITLE="Advanced Tools";
+  MENU_ADV_BUILD="Rebuild Containers"; MENU_ADV_PULL="Pull Images";
+  MENU_ADV_CLONE="Clone/Update Repos"; MENU_ADV_ENSURE="Check Podman";
+  MENU_ADV_EXPORT_ENV="Export .env for Mobile"; MENU_ADV_RESET_DB="Reset Database";
+  MENU_ADV_CLEANUP="Cleanup Podman"; MENU_ADV_SAVE_LOGS="Save Logs";
   # New features
   MENU_HEALTH="API Health Check"; MENU_RESET_DB="Reset Database";
   MENU_EXPORT_ENV="Export .env for mobile"; MENU_HELP="Help / Quick Start";
@@ -1416,31 +1452,36 @@ choose_frontend(){
   fi
 }
 
-# Main menu
+# Main menu - new clean structure
 print_menu(){
   echo
   printf "  ${BOLD}${TECH_BANNER_TITLE}:${RESET} ${GREEN}%s${RESET}    ${BOLD}${FRONTEND_BANNER_TITLE}:${RESET} ${GREEN}%s${RESET}\n" "$CURRENT_TECH" "$CURRENT_FRONTEND_NAME"
   printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
   echo
-  printf "  ${BOLD}${SECTION_MAIN}${RESET}\n"
+  # Section: LAUNCH
+  printf "  ${BOLD}${SECTION_LAUNCH}${RESET}\n"
   printf "    ${GREEN}[1]${RESET}  %s\n" "$MENU_1_FULL_START"
-  printf "    ${CYAN}[S]${RESET}  %s\n" "$MENU_S_STACK"
-  printf "    ${CYAN}[X]${RESET}  %s\n" "$MENU_T_TOOLS"
+  printf "    ${CYAN}[2]${RESET}  %s\n" "$MENU_2_START"
+  printf "    ${CYAN}[3]${RESET}  %s\n" "$MENU_3_STOP"
   echo
-  printf "  ${BOLD}${SECTION_RESOURCES}${RESET}\n"
-  printf "    ${CYAN}[A]${RESET}  %s\n" "$MENU_A_API"
-  printf "    ${CYAN}[H]${RESET}  %s\n" "$MENU_HEALTH"
-  printf "    ${CYAN}[D]${RESET}  %s\n" "$MENU_D_VIEW_DOCS"
-  printf "    ${CYAN}[0]${RESET}  %s\n" "$MENU_0_OPEN"
+  # Section: STATUS & LOGS
+  printf "  ${BOLD}${SECTION_STATUS}${RESET}\n"
+  printf "    ${CYAN}[4]${RESET}  %s\n" "$MENU_4_STATUS"
+  printf "    ${CYAN}[5]${RESET}  %s\n" "$MENU_5_LOGS"
+  printf "    ${CYAN}[6]${RESET}  %s\n" "$MENU_6_OPEN"
   echo
-  printf "  ${BOLD}${SECTION_MOBILE}${RESET}\n"
-  printf "    ${CYAN}[E]${RESET}  %s\n" "$MENU_EXPORT_ENV"
-  printf "    ${YELLOW}[R]${RESET}  %s\n" "$MENU_RESET_DB"
+  # Section: DOCUMENTATION
+  printf "  ${BOLD}${SECTION_DOCS}${RESET}\n"
+  printf "    ${CYAN}[7]${RESET}  %s\n" "$MENU_7_API"
+  printf "    ${CYAN}[8]${RESET}  %s\n" "$MENU_8_DOCS"
   echo
+  # Section: SETTINGS (submenu)
   printf "  ${BOLD}${SECTION_SETTINGS}${RESET}\n"
-  printf "    ${YELLOW}[T]${RESET}  %s\n" "$MENU_TECH"
-  printf "    ${YELLOW}[F]${RESET}  %s\n" "$MENU_FRONTEND"
-  printf "    ${YELLOW}[M]${RESET}  %s\n" "$MENU_LANG"
+  printf "    ${YELLOW}[9]${RESET}  %s  ${CYAN}→${RESET}\n" "$MENU_9_SETTINGS"
+  echo
+  # Section: ADVANCED (submenu)
+  printf "  ${BOLD}${SECTION_ADVANCED}${RESET}\n"
+  printf "    ${YELLOW}[0]${RESET}  %s  ${CYAN}→${RESET}\n" "$MENU_0_ADVANCED"
   echo
   printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
   printf "    ${CYAN}[?]${RESET}  %s\n" "$MENU_HELP"
@@ -1482,31 +1523,63 @@ menu_stack(){
   done
 }
 
-# Tools submenu
-menu_tools(){
+# Settings submenu
+menu_settings(){
   while true; do
     clear; print_banner
     echo
-    printf "  ${BOLD}$MENU_TOOLS_TITLE${RESET}\n"
+    printf "  ${BOLD}$MENU_SETTINGS_TITLE${RESET}\n"
     printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
     echo
-    printf "  ${BOLD}${SECTION_LOGS}${RESET}\n"
-    printf "    ${CYAN}[1]${RESET}  %s\n" "$MENU_LOGS"
-    printf "    ${CYAN}[2]${RESET}  %s\n" "$MENU_LOGS_SAVE"
-    echo
-    printf "  ${BOLD}${SECTION_PODMAN}${RESET}\n"
-    printf "    ${CYAN}[3]${RESET}  %s\n" "$MENU_ENSURE"
-    printf "    ${RED}[4]${RESET}  %s\n" "$MENU_CLEANUP"
+    printf "    ${CYAN}[1]${RESET}  %s\n" "$MENU_SET_TECH"
+    printf "    ${CYAN}[2]${RESET}  %s\n" "$MENU_SET_FRONTEND"
+    printf "    ${CYAN}[3]${RESET}  %s\n" "$MENU_SET_LANG"
     echo
     printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
     printf "    ${CYAN}[0]${RESET}  %s\n" "$MENU_BACK"
     echo
     read -rp "$(printf "${BOLD}$PROMPT_CHOICE${RESET} ")" c
     case "$c" in
-      1) action_logs; pause ;;
-      2) action_export_logs_as_json; pause ;;
-      3) run_action action_ensure_all ;;
-      4) action_cleanup_podman; pause ;;
+      1) choose_technology ;;
+      2) choose_frontend ;;
+      3) prompt_for_language ;;
+      0|q|Q) return ;;
+      *) warn "$WARN_UNKNOWN_CHOICE"; pause ;;
+    esac
+  done
+}
+
+# Advanced submenu
+menu_advanced(){
+  while true; do
+    clear; print_banner
+    echo
+    printf "  ${BOLD}$MENU_ADVANCED_TITLE${RESET}\n"
+    printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+    echo
+    printf "    ${CYAN}[1]${RESET}  %s\n" "$MENU_ADV_BUILD"
+    printf "    ${CYAN}[2]${RESET}  %s\n" "$MENU_ADV_PULL"
+    printf "    ${CYAN}[3]${RESET}  %s\n" "$MENU_ADV_CLONE"
+    printf "    ${CYAN}[4]${RESET}  %s\n" "$MENU_ADV_ENSURE"
+    printf "    ${CYAN}[5]${RESET}  %s\n" "$MENU_ADV_SAVE_LOGS"
+    echo
+    printf "    ${CYAN}[6]${RESET}  %s\n" "$MENU_ADV_EXPORT_ENV"
+    printf "    ${RED}[7]${RESET}  %s\n" "$MENU_ADV_RESET_DB"
+    printf "    ${RED}[8]${RESET}  %s\n" "$MENU_ADV_CLEANUP"
+    echo
+    printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
+    printf "    ${CYAN}[0]${RESET}  %s\n" "$MENU_BACK"
+    echo
+    read -rp "$(printf "${BOLD}$PROMPT_CHOICE${RESET} ")" c
+    case "$c" in
+      1) run_action action_build ;;
+      2) run_action action_pull ;;
+      3) run_action action_clone_update ;;
+      4) run_action action_ensure_all ;;
+      5) action_export_logs_as_json; pause ;;
+      6) action_export_env; pause ;;
+      7) action_reset_db; pause ;;
+      8) action_cleanup_podman; pause ;;
       0|q|Q) return ;;
       *) warn "$WARN_UNKNOWN_CHOICE"; pause ;;
     esac
@@ -1614,18 +1687,22 @@ while true; do
   print_menu
   read -rp "$(printf "${BOLD}$PROMPT_CHOICE${RESET} ")" c
   case "$c" in
+    # LAUNCH section
     1) action_full_run ;;
-    S|s) menu_stack ;;
-    A|a) action_api_info; pause ;;
-    H|h) action_health_check; pause ;;
-    D|d) action_run_docs ;;
-    E|e) action_export_env; pause ;;
-    R|r) action_reset_db; pause ;;
-    T|t) choose_technology ;;
-    F|f) choose_frontend ;;
-    M|m) prompt_for_language ;;
-    X|x) menu_tools ;;
-    0) action_open; pause ;;
+    2) run_action action_up ;;
+    3) run_action action_down ;;
+    # STATUS & LOGS section
+    4) run_action action_status ;;
+    5) action_logs; pause ;;
+    6) action_open; pause ;;
+    # DOCUMENTATION section
+    7) action_api_info; pause ;;
+    8) action_run_docs ;;
+    # SETTINGS submenu
+    9) menu_settings ;;
+    # ADVANCED submenu
+    0) menu_advanced ;;
+    # Help & Quit
     \?) action_help; pause ;;
     q|Q) echo "Bye!"; exit 0 ;;
     *)   warn "$WARN_UNKNOWN_CHOICE"; pause ;;
