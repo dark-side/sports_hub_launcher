@@ -187,10 +187,21 @@ set_lang_uk(){
   MENU_ADV_CLONE="Клонувати/оновити репо"; MENU_ADV_ENSURE="Перевірити Podman";
   MENU_ADV_EXPORT_ENV="Експорт .env для мобайл"; MENU_ADV_RESET_DB="Скинути базу даних";
   MENU_ADV_CLEANUP="Очистити Podman"; MENU_ADV_SAVE_LOGS="Зберегти логи";
+  MENU_ADV_SEED_DB="Заповнити БД тестовими даними";
   # New features
   MENU_HEALTH="Перевірка API"; MENU_RESET_DB="Скинути базу даних";
   MENU_EXPORT_ENV="Експорт .env для мобайл"; MENU_HELP="Довідка / Quick Start";
+  MENU_HEALTH_DASHBOARD="Health Check Dashboard";
   MSG_HEALTH_OK="API працює!"; MSG_HEALTH_FAIL="API не відповідає";
+  # Health Dashboard
+  MSG_DASHBOARD_TITLE="СТАТУС СЕРВІСІВ"; MSG_CHECKING="Перевіряю...";
+  MSG_SERVICE_BACKEND="Backend"; MSG_SERVICE_FRONTEND="Frontend"; MSG_SERVICE_DB="Database";
+  MSG_SERVICE_API="API Endpoint"; MSG_STATUS_OK="OK"; MSG_STATUS_FAIL="ПОМИЛКА";
+  MSG_STATUS_RUNNING="Працює"; MSG_STATUS_STOPPED="Зупинено";
+  # Seed DB
+  MSG_SEED_DB_TITLE="Заповнення БД тестовими даними";
+  MSG_SEED_DB_CONFIRM="Заповнити базу тестовими даними? (y/N):";
+  MSG_SEED_DB_DONE="Тестові дані додано!"; MSG_SEED_DB_FAIL="Помилка заповнення БД";
   MSG_RESET_DB_WARN="УВАГА: Це видалить всі дані з бази!";
   MSG_RESET_DB_CONFIRM="Скинути базу? (y/N):";
   MSG_RESET_DB_DONE="Базу даних скинуто.";
@@ -259,10 +270,21 @@ set_lang_en(){
   MENU_ADV_CLONE="Clone/Update Repos"; MENU_ADV_ENSURE="Check Podman";
   MENU_ADV_EXPORT_ENV="Export .env for Mobile"; MENU_ADV_RESET_DB="Reset Database";
   MENU_ADV_CLEANUP="Cleanup Podman"; MENU_ADV_SAVE_LOGS="Save Logs";
+  MENU_ADV_SEED_DB="Seed Database with Test Data";
   # New features
   MENU_HEALTH="API Health Check"; MENU_RESET_DB="Reset Database";
   MENU_EXPORT_ENV="Export .env for mobile"; MENU_HELP="Help / Quick Start";
+  MENU_HEALTH_DASHBOARD="Health Check Dashboard";
   MSG_HEALTH_OK="API is working!"; MSG_HEALTH_FAIL="API is not responding";
+  # Health Dashboard
+  MSG_DASHBOARD_TITLE="SERVICE STATUS"; MSG_CHECKING="Checking...";
+  MSG_SERVICE_BACKEND="Backend"; MSG_SERVICE_FRONTEND="Frontend"; MSG_SERVICE_DB="Database";
+  MSG_SERVICE_API="API Endpoint"; MSG_STATUS_OK="OK"; MSG_STATUS_FAIL="ERROR";
+  MSG_STATUS_RUNNING="Running"; MSG_STATUS_STOPPED="Stopped";
+  # Seed DB
+  MSG_SEED_DB_TITLE="Seed Database with Test Data";
+  MSG_SEED_DB_CONFIRM="Seed database with test data? (y/N):";
+  MSG_SEED_DB_DONE="Test data added!"; MSG_SEED_DB_FAIL="Failed to seed database";
   MSG_RESET_DB_WARN="WARNING: This will delete all data from the database!";
   MSG_RESET_DB_CONFIRM="Reset database? (y/N):";
   MSG_RESET_DB_DONE="Database has been reset.";
@@ -1304,6 +1326,273 @@ action_health_check() {
   echo
 }
 
+# ==================== Health Check Dashboard ====================
+action_health_dashboard() {
+  clear
+  echo
+  printf "  ${BOLD}${CYAN}╔═══════════════════════════════════════════════════════╗${RESET}\n"
+  printf "  ${BOLD}${CYAN}║${RESET}           ${BOLD}$MSG_DASHBOARD_TITLE${RESET}                    ${BOLD}${CYAN}║${RESET}\n"
+  printf "  ${BOLD}${CYAN}╚═══════════════════════════════════════════════════════╝${RESET}\n"
+  echo
+  
+  local api_port="3002"
+  local frontend_port="3000"
+  local db_port="5432"
+  
+  # Function to check container status
+  check_container() {
+    local name_pattern="$1"
+    local container_id
+    container_id=$(podman ps -q --filter "name=${name_pattern}" 2>/dev/null | head -1)
+    if [[ -n "$container_id" ]]; then
+      echo "running"
+    else
+      container_id=$(podman ps -aq --filter "name=${name_pattern}" 2>/dev/null | head -1)
+      if [[ -n "$container_id" ]]; then
+        echo "stopped"
+      else
+        echo "not_found"
+      fi
+    fi
+  }
+  
+  # Function to check HTTP endpoint
+  check_http() {
+    local url="$1"
+    local timeout="${2:-5}"
+    local response
+    response=$(curl -s --max-time "$timeout" -w "%{http_code}" -o /dev/null "$url" 2>/dev/null || echo "000")
+    echo "$response"
+  }
+  
+  # Function to print status
+  print_status() {
+    local label="$1"
+    local status="$2"
+    local extra="$3"
+    printf "  ${BOLD}%-20s${RESET}" "$label"
+    case "$status" in
+      "ok"|"running"|"200"|"201"|"204"|"301"|"302")
+        printf "${GREEN}● $MSG_STATUS_OK${RESET}"
+        ;;
+      "stopped")
+        printf "${YELLOW}○ $MSG_STATUS_STOPPED${RESET}"
+        ;;
+      "000"|"not_found"|"fail")
+        printf "${RED}✗ $MSG_STATUS_FAIL${RESET}"
+        ;;
+      *)
+        printf "${YELLOW}? ${status}${RESET}"
+        ;;
+    esac
+    [[ -n "$extra" ]] && printf " ${CYAN}($extra)${RESET}"
+    echo
+  }
+  
+  printf "  ${BOLD}${SECTION_STATUS}${RESET}\n"
+  printf "  ${CYAN}───────────────────────────────────────────────────────${RESET}\n"
+  
+  # Check containers
+  printf "\n  ${BOLD}CONTAINERS${RESET}\n"
+  
+  printf "  %-20s %s\n" "" "$MSG_CHECKING"
+  
+  # Backend container
+  local backend_status
+  backend_status=$(check_container "backend\|api\|rails\|node\|python\|java")
+  print_status "$MSG_SERVICE_BACKEND" "$backend_status" "container"
+  
+  # Frontend container
+  local frontend_status
+  frontend_status=$(check_container "frontend\|react\|angular\|web")
+  print_status "$MSG_SERVICE_FRONTEND" "$frontend_status" "container"
+  
+  # Database container
+  local db_status
+  db_status=$(check_container "db\|postgres\|mysql\|mongo\|database")
+  print_status "$MSG_SERVICE_DB" "$db_status" "container"
+  
+  # Check HTTP endpoints
+  printf "\n  ${BOLD}HTTP ENDPOINTS${RESET}\n"
+  
+  # Backend API
+  local api_http
+  api_http=$(check_http "http://localhost:${api_port}/api/articles")
+  print_status "Backend API" "$api_http" "port ${api_port}"
+  
+  # Frontend
+  local frontend_http
+  frontend_http=$(check_http "http://localhost:${frontend_port}")
+  print_status "Frontend" "$frontend_http" "port ${frontend_port}"
+  
+  # Database connection (via backend health or direct)
+  printf "  ${BOLD}%-20s${RESET}" "Database"
+  if [[ "$db_status" == "running" ]]; then
+    # Try to check if DB is accepting connections
+    if podman exec $(podman ps -q --filter "name=db\|postgres" | head -1) pg_isready -U postgres >/dev/null 2>&1; then
+      printf "${GREEN}● $MSG_STATUS_OK${RESET} ${CYAN}(port ${db_port})${RESET}\n"
+    else
+      printf "${GREEN}● $MSG_STATUS_RUNNING${RESET} ${CYAN}(port ${db_port})${RESET}\n"
+    fi
+  else
+    printf "${RED}✗ $MSG_STATUS_FAIL${RESET}\n"
+  fi
+  
+  # API Endpoints detail
+  printf "\n  ${BOLD}API ENDPOINTS${RESET}\n"
+  local endpoints=("/api/articles" "/api/users" "/api/auth/sign_in")
+  for ep in "${endpoints[@]}"; do
+    local ep_status
+    ep_status=$(check_http "http://localhost:${api_port}${ep}")
+    print_status "  ${ep}" "$ep_status" ""
+  done
+  
+  # Summary
+  echo
+  printf "  ${CYAN}───────────────────────────────────────────────────────${RESET}\n"
+  
+  local all_ok=true
+  [[ "$backend_status" != "running" ]] && all_ok=false
+  [[ "$frontend_status" != "running" ]] && all_ok=false
+  [[ "$db_status" != "running" ]] && all_ok=false
+  [[ "$api_http" == "000" ]] && all_ok=false
+  
+  if $all_ok; then
+    printf "  ${GREEN}${BOLD}✓ All services are running!${RESET}\n"
+  else
+    printf "  ${YELLOW}${BOLD}⚠ Some services need attention${RESET}\n"
+    echo
+    printf "  ${CYAN}Tip:${RESET} Run ${GREEN}[1]${RESET} Full Start or ${CYAN}[2]${RESET} Start Stack\n"
+  fi
+  echo
+}
+
+# ==================== Seed Database ====================
+action_seed_db() {
+  echo
+  printf "  ${BOLD}$MSG_SEED_DB_TITLE${RESET}\n"
+  printf "  ${CYAN}───────────────────────────────────────────────────────${RESET}\n"
+  echo
+  
+  read -rp "$(printf "${BOLD}$MSG_SEED_DB_CONFIRM${RESET} ")" confirm
+  if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+    log "Seed cancelled."
+    return 0
+  fi
+  
+  set_target_dir || return 1
+  
+  log "Seeding database with test data..."
+  
+  # Detect technology and run appropriate seed command
+  case "$CURRENT_TECH_KEY" in
+    ruby)
+      # Rails seed
+      local backend_container
+      backend_container=$(podman ps -q --filter "name=backend\|api\|rails" | head -1)
+      if [[ -n "$backend_container" ]]; then
+        log "Running Rails db:seed..."
+        podman exec "$backend_container" bundle exec rails db:seed 2>&1 || {
+          err "$MSG_SEED_DB_FAIL"
+          return 1
+        }
+      else
+        err "Backend container not found. Start the stack first."
+        return 1
+      fi
+      ;;
+    node)
+      # Node.js seed (using npm run seed or similar)
+      local backend_container
+      backend_container=$(podman ps -q --filter "name=backend\|api\|node" | head -1)
+      if [[ -n "$backend_container" ]]; then
+        log "Running npm seed..."
+        podman exec "$backend_container" npm run seed 2>&1 || \
+        podman exec "$backend_container" npx prisma db seed 2>&1 || {
+          # Fallback: try to run seed SQL directly
+          log "Trying direct SQL seed..."
+          seed_db_sql
+        }
+      else
+        err "Backend container not found. Start the stack first."
+        return 1
+      fi
+      ;;
+    python)
+      # Python/Django seed
+      local backend_container
+      backend_container=$(podman ps -q --filter "name=backend\|api\|python\|django" | head -1)
+      if [[ -n "$backend_container" ]]; then
+        log "Running Python seed..."
+        podman exec "$backend_container" python manage.py loaddata seed_data.json 2>&1 || \
+        podman exec "$backend_container" python seed.py 2>&1 || {
+          log "Trying direct SQL seed..."
+          seed_db_sql
+        }
+      else
+        err "Backend container not found. Start the stack first."
+        return 1
+      fi
+      ;;
+    java)
+      # Java/Spring seed - usually via SQL or Flyway
+      log "Running SQL seed for Java backend..."
+      seed_db_sql
+      ;;
+    *)
+      log "Running generic SQL seed..."
+      seed_db_sql
+      ;;
+  esac
+  
+  ok "$MSG_SEED_DB_DONE"
+}
+
+# Helper function to seed DB via SQL
+seed_db_sql() {
+  local db_container
+  db_container=$(podman ps -q --filter "name=db\|postgres\|mysql" | head -1)
+  
+  if [[ -z "$db_container" ]]; then
+    err "Database container not found."
+    return 1
+  fi
+  
+  # Create sample seed data
+  local seed_sql="
+-- Sports Hub Test Data
+-- Generated: $(date)
+
+-- Sample Categories
+INSERT INTO categories (name, created_at, updated_at) VALUES 
+  ('Football', NOW(), NOW()),
+  ('Basketball', NOW(), NOW()),
+  ('Tennis', NOW(), NOW()),
+  ('Hockey', NOW(), NOW())
+ON CONFLICT DO NOTHING;
+
+-- Sample Articles
+INSERT INTO articles (title, content, category_id, created_at, updated_at) VALUES 
+  ('Champions League Final Preview', 'The biggest match of the year is approaching...', 1, NOW(), NOW()),
+  ('NBA Playoffs Update', 'The playoff race is heating up...', 2, NOW(), NOW()),
+  ('Wimbledon 2024 Preview', 'The grass court season begins...', 3, NOW(), NOW()),
+  ('Stanley Cup Finals', 'Hockey''s ultimate prize awaits...', 4, NOW(), NOW())
+ON CONFLICT DO NOTHING;
+
+-- Sample Users (for testing)
+INSERT INTO users (email, name, created_at, updated_at) VALUES 
+  ('admin@sportshub.test', 'Admin User', NOW(), NOW()),
+  ('editor@sportshub.test', 'Editor User', NOW(), NOW()),
+  ('reader@sportshub.test', 'Reader User', NOW(), NOW())
+ON CONFLICT DO NOTHING;
+"
+  
+  log "Inserting test data into database..."
+  echo "$seed_sql" | podman exec -i "$db_container" psql -U postgres -d postgres 2>&1 || {
+    warn "Some seed data may have failed (duplicates are OK)"
+  }
+}
+
 # ==================== Reset Database ====================
 action_reset_db() {
   echo
@@ -1467,20 +1756,18 @@ print_menu(){
   # Section: STATUS & LOGS
   printf "  ${BOLD}${SECTION_STATUS}${RESET}\n"
   printf "    ${CYAN}[4]${RESET}  %s\n" "$MENU_4_STATUS"
-  printf "    ${CYAN}[5]${RESET}  %s\n" "$MENU_5_LOGS"
-  printf "    ${CYAN}[6]${RESET}  %s\n" "$MENU_6_OPEN"
+  printf "    ${GREEN}[5]${RESET}  %s\n" "$MENU_HEALTH_DASHBOARD"
+  printf "    ${CYAN}[6]${RESET}  %s\n" "$MENU_5_LOGS"
+  printf "    ${CYAN}[7]${RESET}  %s\n" "$MENU_6_OPEN"
   echo
   # Section: DOCUMENTATION
   printf "  ${BOLD}${SECTION_DOCS}${RESET}\n"
-  printf "    ${CYAN}[7]${RESET}  %s\n" "$MENU_7_API"
-  printf "    ${CYAN}[8]${RESET}  %s\n" "$MENU_8_DOCS"
+  printf "    ${CYAN}[8]${RESET}  %s\n" "$MENU_7_API"
+  printf "    ${CYAN}[9]${RESET}  %s\n" "$MENU_8_DOCS"
   echo
-  # Section: SETTINGS (submenu)
-  printf "  ${BOLD}${SECTION_SETTINGS}${RESET}\n"
-  printf "    ${YELLOW}[9]${RESET}  %s  ${CYAN}→${RESET}\n" "$MENU_9_SETTINGS"
-  echo
-  # Section: ADVANCED (submenu)
-  printf "  ${BOLD}${SECTION_ADVANCED}${RESET}\n"
+  # Section: SETTINGS & ADVANCED (submenus)
+  printf "  ${BOLD}${SECTION_SETTINGS} / ${SECTION_ADVANCED}${RESET}\n"
+  printf "    ${YELLOW}[S]${RESET}  %s  ${CYAN}→${RESET}\n" "$MENU_9_SETTINGS"
   printf "    ${YELLOW}[0]${RESET}  %s  ${CYAN}→${RESET}\n" "$MENU_0_ADVANCED"
   echo
   printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
@@ -1562,10 +1849,11 @@ menu_advanced(){
     printf "    ${CYAN}[3]${RESET}  %s\n" "$MENU_ADV_CLONE"
     printf "    ${CYAN}[4]${RESET}  %s\n" "$MENU_ADV_ENSURE"
     printf "    ${CYAN}[5]${RESET}  %s\n" "$MENU_ADV_SAVE_LOGS"
-    echo
     printf "    ${CYAN}[6]${RESET}  %s\n" "$MENU_ADV_EXPORT_ENV"
-    printf "    ${RED}[7]${RESET}  %s\n" "$MENU_ADV_RESET_DB"
-    printf "    ${RED}[8]${RESET}  %s\n" "$MENU_ADV_CLEANUP"
+    echo
+    printf "    ${YELLOW}[7]${RESET}  %s\n" "$MENU_ADV_SEED_DB"
+    printf "    ${RED}[8]${RESET}  %s\n" "$MENU_ADV_RESET_DB"
+    printf "    ${RED}[9]${RESET}  %s\n" "$MENU_ADV_CLEANUP"
     echo
     printf "  ${CYAN}═══════════════════════════════════════════════════════${RESET}\n"
     printf "    ${CYAN}[0]${RESET}  %s\n" "$MENU_BACK"
@@ -1578,8 +1866,9 @@ menu_advanced(){
       4) run_action action_ensure_all ;;
       5) action_export_logs_as_json; pause ;;
       6) action_export_env; pause ;;
-      7) action_reset_db; pause ;;
-      8) action_cleanup_podman; pause ;;
+      7) action_seed_db; pause ;;
+      8) action_reset_db; pause ;;
+      9) action_cleanup_podman; pause ;;
       0|q|Q) return ;;
       *) warn "$WARN_UNKNOWN_CHOICE"; pause ;;
     esac
@@ -1693,13 +1982,14 @@ while true; do
     3) run_action action_down ;;
     # STATUS & LOGS section
     4) run_action action_status ;;
-    5) action_logs; pause ;;
-    6) action_open; pause ;;
+    5) action_health_dashboard; pause ;;
+    6) action_logs; pause ;;
+    7) action_open; pause ;;
     # DOCUMENTATION section
-    7) action_api_info; pause ;;
-    8) action_run_docs ;;
+    8) action_api_info; pause ;;
+    9) action_run_docs ;;
     # SETTINGS submenu
-    9) menu_settings ;;
+    S|s) menu_settings ;;
     # ADVANCED submenu
     0) menu_advanced ;;
     # Help & Quit
