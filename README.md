@@ -9,9 +9,11 @@ Now, everything is consolidated into one universal script — `setup.sh` — whi
 
 ### Interface Design
 The CLI features a clean, professional interface with:
-- Structured menu sections (MAIN, RESOURCES, SETTINGS)
-- Color-coded options for easy navigation
+- Structured menu sections (LAUNCH, STATUS & LOGS, DOCUMENTATION, SETTINGS/ADVANCED)
+- Numeric keys [1-9, 0, S] for easy one-hand navigation
+- Color-coded options (green for primary actions, yellow for settings, red for destructive)
 - Bilingual support (English/Ukrainian)
+- Health Check Dashboard for real-time service monitoring
 - Consistent formatting across all menus and submenus
 
 ---
@@ -95,7 +97,7 @@ Your selections are stored for future sessions in:
 ~/.config/sportshub-setup/
 ```
 
-You can change these settings anytime using the **SETTINGS** section in the main menu ([T], [F], [M]).
+You can change these settings anytime using **[S] Settings** from the main menu.
 
 ---
 
@@ -103,67 +105,98 @@ You can change these settings anytime using the **SETTINGS** section in the main
 
 ### Main Menu Structure
 
-The main menu is organized into three logical sections:
+The main menu is organized into logical sections with numeric keys for easy navigation:
 
-#### MAIN
+#### LAUNCH (ЗАПУСК)
 | Option | Description |
 |:--|:--|
 | **[1] Full Start** | Performs full environment validation, clones/updates repositories, starts containers, waits for service availability, and opens the app in your browser. |
-| **[S] Manage Stack** | Opens the Stack Management submenu with container operations. |
-| **[X] Tools** | Opens the Tools submenu with logs and Podman utilities. |
+| **[2] Start Stack** | Starts all containers in detached mode (`podman compose up -d`). |
+| **[3] Stop Stack** | Stops and removes all running containers for the current backend. |
 
-#### RESOURCES
+#### STATUS & LOGS (СТАТУС І ЛОГИ)
 | Option | Description |
 |:--|:--|
-| **[A] API Info** | Displays comprehensive API information including endpoints, URLs, and example curl commands. |
-| **[D] Documentation** | Builds and launches a local documentation container (`api_docs_genai_playground`) and opens it at [http://localhost:5173](http://localhost:5173). |
-| **[0] Open in browser** | Opens the running application (default: [http://localhost:3000](http://localhost:3000)). |
+| **[4] Container Status** | Shows the list of currently running containers. |
+| **[5] Health Dashboard** | Displays real-time status of all services (containers, HTTP endpoints, API health, database connection). |
+| **[6] View Logs** | Opens live logs from running containers. |
+| **[7] Open in Browser** | Opens the running application (default: [http://localhost:3000](http://localhost:3000)). |
 
-#### SETTINGS
+#### DOCUMENTATION (ДОКУМЕНТАЦІЯ)
 | Option | Description |
 |:--|:--|
-| **[T] Change technology** | Switches between backend technologies (e.g., Java → Go). Automatically updates repo URLs and paths. |
-| **[F] Change frontend** | Switches between React and Angular for the selected backend. |
-| **[M] Change language** | Switches interface language between English and Ukrainian. |
+| **[8] API Info** | Displays comprehensive API information including endpoints, URLs, and example curl commands. |
+| **[9] Documentation** | Builds and launches a local documentation container (`api_docs_genai_playground`) and opens it at [http://localhost:5173](http://localhost:5173). |
 
-#### EXIT
+#### SETTINGS / ADVANCED (НАЛАШТУВАННЯ / ДОДАТКОВО)
 | Option | Description |
 |:--|:--|
+| **[S] Settings** | Opens Settings submenu (technology, frontend, language). |
+| **[0] Advanced** | Opens Advanced Tools submenu (rebuild, seed DB, cleanup). |
+
+#### OTHER
+| Option | Description |
+|:--|:--|
+| **[?] Help** | Shows quick start guide and troubleshooting tips. |
 | **[Q] Quit** | Exits the CLI. |
 
 ---
 
-### Stack Management Submenu [S]
+### Settings Submenu [S]
 
 | Option | Description |
 |:--|:--|
-| **[1] Start** | Starts all containers in detached mode (`podman compose up -d`). Includes automatic recovery from "proxy already running" issues. |
-| **[2] Stop** | Stops and removes all running containers for the current backend. |
-| **[3] Rebuild** | Rebuilds images for backend and frontend services. |
-| **[4] Pull images** | Pulls the latest container images defined in your compose file. |
-| **[5] Status** | Shows the list of currently running containers. |
-| **[6] Clone/update repos** | Clones or updates backend, frontend, and optional docs repositories for the selected tech stack. |
+| **[1] Change Technology** | Switches between backend technologies (e.g., Java → Go). Automatically updates repo URLs and paths. |
+| **[2] Change Frontend** | Switches between React and Angular for the selected backend. |
+| **[3] Change Language** | Switches interface language between English and Ukrainian. |
 | **[0] Back** | Returns to the main menu. |
 
 ---
 
-### Tools Submenu [X]
-
-#### LOGS
-| Option | Description |
-|:--|:--|
-| **[1] View logs** | Opens a sub-menu with options to follow logs live or view recent logs. |
-| **[2] Save logs** | Exports container logs to a JSON file in the `app_logs/` directory. |
-
-#### PODMAN
-| Option | Description |
-|:--|:--|
-| **[3] Check Podman** | Ensures Podman and Compose are installed and configured. Initializes and starts the Podman machine if needed. |
-| **[4] Cleanup Podman** | Removes all containers, images, and optionally uninstalls Podman completely. Use with caution. |
+### Advanced Tools Submenu [0]
 
 | Option | Description |
 |:--|:--|
+| **[1] Rebuild Containers** | Rebuilds images for backend and frontend services. |
+| **[2] Pull Images** | Pulls the latest container images defined in your compose file. |
+| **[3] Clone/Update Repos** | Clones or updates backend, frontend, and optional docs repositories. |
+| **[4] Check Podman** | Ensures Podman and Compose are installed and configured. |
+| **[5] Save Logs** | Exports container logs to a JSON file in the `app_logs/` directory. |
+| **[6] Export .env for Mobile** | Generates environment file for mobile developers. |
+| **[7] Seed Database** | Populates database with test data (categories, articles, users). |
+| **[8] Reset Database** | ⚠️ Removes all data and recreates database from scratch. |
+| **[9] Cleanup Podman** | ⚠️ Removes all containers, images, and optionally uninstalls Podman. |
 | **[0] Back** | Returns to the main menu. |
+
+---
+
+### Health Check Dashboard
+
+The Health Dashboard (`[5]` from main menu) provides a comprehensive view of all services:
+
+```
+╬═══════════════════════════════════════════════════════╗
+║           SERVICE STATUS                              ║
+╚═══════════════════════════════════════════════════════╝
+
+CONTAINERS
+  Backend             ● OK (container)
+  Frontend            ● OK (container)
+  Database            ● OK (container)
+
+HTTP ENDPOINTS
+  Backend API         ● OK (port 3002)
+  Frontend            ● OK (port 3000)
+  Database            ● OK (port 5432)
+
+API ENDPOINTS
+  /api/articles       ● 200
+  /api/users          ● 200
+  /api/auth/sign_in   ● 200
+
+───────────────────────────────────────────────────────
+✓ All services are running!
+```
 
 ---
 
@@ -178,26 +211,41 @@ The main menu is organized into three logical sections:
 # 4. Press [1] for Full Start
 ```
 
-### Example 2: Switch Technology Stack
+### Example 2: Check Service Health
 ```bash
 # From main menu:
-# Press [T] to change backend technology
-# Press [F] to change frontend framework
-# Press [S] then [6] to clone/update new repositories
-# Press [S] then [1] to start the new stack
+# Press [5] to open Health Dashboard
+# View status of all containers, HTTP endpoints, and API health
 ```
 
-### Example 3: View API Information
+### Example 3: Switch Technology Stack
 ```bash
 # From main menu:
-# Press [A] to see all API endpoints, URLs, and example curl commands
+# Press [S] for Settings menu
+# Press [1] to change backend technology
+# Press [2] to change frontend framework
+# Press [2] from main menu to start the new stack
 ```
 
-### Example 4: Export Logs for Debugging
+### Example 4: Seed Database with Test Data
 ```bash
 # From main menu:
-# Press [X] for Tools menu
-# Press [2] to save logs as JSON
+# Press [0] for Advanced Tools
+# Press [7] to seed database
+# Confirm with 'y' to populate test categories, articles, and users
+```
+
+### Example 5: View API Information
+```bash
+# From main menu:
+# Press [8] to see all API endpoints, URLs, and example curl commands
+```
+
+### Example 6: Export Logs for Debugging
+```bash
+# From main menu:
+# Press [0] for Advanced Tools
+# Press [5] to save logs as JSON
 # Logs will be saved to app_logs/ directory
 ```
 
