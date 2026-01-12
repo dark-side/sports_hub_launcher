@@ -622,7 +622,11 @@ ensure_podman_machine_if_needed(){
 
       if ! echo "$machine_output" | grep -qi "NAME"; then
         log "No Podman machine found. Initializing..."
-        if ! podman machine init; then
+        set +e
+        podman machine init
+        local init_rc=$?
+        set -e
+        if [ $init_rc -ne 0 ]; then
           err "Failed to initialize Podman machine"
           diagnose_podman_issue "$machine_output"
           return 1
@@ -750,13 +754,54 @@ resolve_compose_cmd(){
 }
 
 ensure_engine_ready(){
+  set +e  # Temporarily disable exit on error
+  
   ensure_git
+  local git_rc=$?
+  
   ensure_podman
+  local podman_rc=$?
+  
   ensure_podman_machine_if_needed
+  local machine_rc=$?
+  
   ensure_container_sane_defaults
+  local container_rc=$?
+  
   ensure_podman_compose
+  local compose_rc=$?
+  
+  set -e  # Re-enable exit on error
+  
+  # Check if any critical component failed
+  if [ $git_rc -ne 0 ]; then
+    err "Git installation failed"
+    return 1
+  fi
+  
+  if [ $podman_rc -ne 0 ]; then
+    err "Podman installation failed"
+    return 1
+  fi
+  
+  # For machine, verify it's actually working regardless of return code
+  if [ $machine_rc -ne 0 ]; then
+    warn "Machine function returned error, but checking actual status..."
+    if ! podman info >/dev/null 2>&1; then
+      err "Podman machine is not responding"
+      return 1
+    else
+      ok "Podman machine is actually working!"
+    fi
+  fi
+  
+  if [ $compose_rc -ne 0 ]; then
+    warn "Podman compose not available, but continuing..."
+  fi
+  
   if [ -z "${CMD:-}" ]; then CMD=$(resolve_compose_cmd); fi
   ok "Using compose: ${BOLD}$CMD${RESET}"
+  return 0
 }
 
 # ==================== Repo ops & state ====================
