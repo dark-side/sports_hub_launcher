@@ -631,22 +631,33 @@ ensure_podman_machine_if_needed(){
       fi
 
       log "Starting Podman machine..."
+      set +e
       local start_output
-      start_output=$(podman machine start 2>&1) || {
-        local rc=$?
-        err "Failed to start Podman machine"
-        diagnose_podman_issue "$start_output"
-        return $rc
-      }
-
+      start_output=$(podman machine start 2>&1)
+      local start_rc=$?
+      set -e
+      
+      # Check if machine is actually running, regardless of exit code
+      sleep 2
       if podman info >/dev/null 2>&1; then
         ok "Podman machine started successfully"
         return 0
-      else
-        err "Podman machine started but cannot connect"
-        diagnose_podman_issue "$(podman info 2>&1 || true)"
-        return 1
       fi
+      
+      # If not running, check if it was a recoverable error
+      if echo "$start_output" | grep -qi "recovered successfully"; then
+        warn "Podman machine recovered from error, verifying..."
+        sleep 3
+        if podman info >/dev/null 2>&1; then
+          ok "Podman machine is now running"
+          return 0
+        fi
+      fi
+      
+      # If still not working, report error
+      err "Failed to start Podman machine"
+      diagnose_podman_issue "$start_output"
+      return 1
       ;;
   esac
 }
